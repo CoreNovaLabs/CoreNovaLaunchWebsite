@@ -93,10 +93,11 @@ const en: Dict = {
   docs_subtitle: "How CoreNova verification works, and how to get the most out of it.",
   docs_read: "Read",
   docs_empty: "Documentation is being written — check back soon.",
-  deploy_coming_soon:
-    "One-click deployment is coming soon. The exact image, port and instance for this version are listed under Quick Deploy below.",
-  template_coming_soon:
-    "Parameterized CloudFormation template generation is coming soon — it will deploy this verified version into your own AWS account.",
+  deploy_hint:
+    "Pick a region below, then Generate Template — it creates the VPC + host in your own AWS account and deploys this verified version (about 10 minutes; AWS costs apply).",
+  template_console_hint:
+    "Opening AWS CloudFormation with the official one-click template (VPC + host). The image is pinned to this version's verified digest, resources are created in your own account, and first boot takes about 5–10 minutes.",
+  download_template: "Download template (YAML)",
   actions_run: "Actions run",
   // updates page
   updates_title: "Updates",
@@ -217,10 +218,11 @@ const zh: Dict = {
   docs_subtitle: "了解 CoreNova 验证的工作方式，以及如何用好它。",
   docs_read: "阅读",
   docs_empty: "文档编写中，敬请期待。",
-  deploy_coming_soon:
-    "一键部署即将推出。该版本的精确镜像、端口与实例档见下方「快速部署」。",
-  template_coming_soon:
-    "参数化 CloudFormation 模板生成即将推出——届时可把该已验证版本部署到你自己的 AWS 账号。",
+  deploy_hint:
+    "在下方选择区域后点击 Generate Template——会在你自己的 AWS 账号里创建 VPC 与主机并部署该已验证版本（约 10 分钟，产生 AWS 费用）。",
+  template_console_hint:
+    "正在用官方 one-click 模板（VPC + 主机）打开 CloudFormation 创建向导，镜像已按本验证版本的 digest 钉住。资源创建在你自己的账号中，会产生 AWS 费用；首次装机约 5–10 分钟。",
+  download_template: "下载模板（YAML）",
   actions_run: "Actions 运行",
   updates_title: "更新",
   updates_subtitle: "追踪所有软件的最新已验证部署。",

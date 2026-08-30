@@ -298,8 +298,8 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
             </ul>
             <p>
               {locale === "zh"
-                ? "参数化 CloudFormation 模板生成即将推出；届时可一键在你自己的 AWS 账号内部署，部署端点由你掌控（非 CoreNova 托管）。"
-                : "Parameterized CloudFormation template generation is coming soon; it will one-click deploy into your own AWS account — the endpoint is yours, not CoreNova-hosted."}
+                ? "在应用页点击 Generate Template，即用官方 one-click 模板把该 digest 钉住的版本部署到你自己的 AWS 账号（端点由你掌控，非 CoreNova 托管）。"
+                : "Use Generate Template on the app page — it deploys this digest-pinned version into your own AWS account via the official one-click template (the endpoint is yours, not CoreNova-hosted)."}
             </p>
             <p>
               <a href={rec.current.deploy.documentation_url} target="_blank" rel="noreferrer">

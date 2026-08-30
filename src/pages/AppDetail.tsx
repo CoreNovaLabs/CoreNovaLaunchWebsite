@@ -78,6 +78,29 @@ export function AppDetail() {
   const shots = orderedScreenshots(app);
   const stars = useStars(app.app);
 
+  // Generate Template：用官方 one-click 模板 + 当前已验证版本的参数，打开 CloudFormation 创建向导。
+  // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
+  const generateDeploy = () => {
+    const region = app.deploy.regions[0] || "us-east-1";
+    const verified =
+      versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
+    const digest = verified?.manifest.container.digest;
+    const image = digest
+      ? `${app.deploy.docker_image}@${digest}`
+      : app.deploy.docker_image || app.app;
+    const templateUrl = `${window.location.origin}/templates/corenova-one-click.template.yaml`;
+    const url =
+      `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}` +
+      `#/stacks/create/review?stackName=corenova-${app.app}` +
+      `&templateURL=${encodeURIComponent(templateUrl)}` +
+      `&param_AppName=${encodeURIComponent(app.app)}` +
+      `&param_ImageReference=${encodeURIComponent(image)}` +
+      `&param_ContainerPort=${app.deploy.container_port}` +
+      `&param_InstanceType=${encodeURIComponent(app.deploy.instance_type)}`;
+    window.open(url, "_blank", "noopener");
+    return url;
+  };
+
   useEffect(() => {
     if (!zoom) return;
     const onKey = (e: KeyboardEvent) => {
@@ -161,7 +184,7 @@ export function AppDetail() {
                 className="btn btn--primary"
                 onClick={() => {
                   scrollTo("deployment");
-                  setDeployMsg(t("deploy_coming_soon"));
+                  setDeployMsg(t("deploy_hint"));
                 }}
               >
                 {t("deploy_now")} <ArrowRightIcon size={16} />
@@ -352,12 +375,24 @@ export function AppDetail() {
                       <option>{app.deploy.instance_type}</option>
                     </select>
                   </div>
-                  <button
-                    className="btn btn--primary quick-deploy__btn"
-                    onClick={() => setDeployMsg(t("template_coming_soon"))}
-                  >
-                    <DownloadIcon size={16} /> {t("generate_template")}
-                  </button>
+                  <div className="quick-deploy__field quick-deploy__btn">
+                    <button
+                      className="btn btn--primary"
+                      onClick={() => {
+                        generateDeploy();
+                        setDeployMsg(t("template_console_hint"));
+                      }}
+                    >
+                      <DownloadIcon size={16} /> {t("generate_template")}
+                    </button>
+                    <a
+                      className="section__link"
+                      href="/templates/corenova-one-click.template.yaml"
+                      download
+                    >
+                      {t("download_template")}
+                    </a>
+                  </div>
                 </div>
           </div>
         </div>

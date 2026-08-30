@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { useI18n, pick } from "../i18n";
+import { AppLink } from "../components/ui";
 import { useApps } from "../data/useAppData";
 import { versionRecords } from "../data/generated";
-import { VerifiedBadge, ReleaseBadge, useLocalePath } from "../components/ui";
+import { VerifiedBadge, ReleaseBadge } from "../components/ui";
 import { timeAgo } from "../lib/format";
 import { useTitle } from "../lib/hooks";
 import type { AppCurrent, AppVersionRecord, ReleaseType } from "../data/types";
@@ -26,7 +27,6 @@ function summary(notes: string): string {
 
 export function Updates() {
   const { locale, t } = useI18n();
-  const l = useLocalePath();
   const apps = useApps();
   const [filterType, setFilterType] = useState<"all" | ReleaseType>("all");
   const [verifiedOnly, setVerifiedOnly] = useState(true);
@@ -126,16 +126,12 @@ export function Updates() {
                   {timeAgo(record.manifest.verified_at, locale)}
                 </div>
                 <div className="update-row__links">
-                  <a className="link-blue" href={l(`/apps/${app.app}/`)} onClick={(e) => e.preventDefault()}>
+                  <AppLink className="link-blue" to={`/apps/${app.app}/`}>
                     {t("view_app", { app: name })} →
-                  </a>
-                  <a
-                    className="link-blue"
-                    href={l(`/apps/${app.app}/versions/`)}
-                    onClick={(e) => e.preventDefault()}
-                  >
+                  </AppLink>
+                  <AppLink className="link-blue" to={`/apps/${app.app}/versions/`}>
                     {t("version_history_link")} →
-                  </a>
+                  </AppLink>
                 </div>
               </div>
             );
