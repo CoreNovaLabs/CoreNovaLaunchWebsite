@@ -244,16 +244,6 @@ export function Home() {
         <div className="container">
           <div className="region-section__head">
             <h2 className="region-section__title">{t("aws_region_support")}</h2>
-            <a
-              className="section__link"
-              href={l("/apps")}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(l("/apps"));
-              }}
-            >
-              {t("view_all_regions")} <ArrowRightIcon size={14} />
-            </a>
           </div>
           <div className="region-grid">
             {REGIONS.map((r) => (

@@ -80,10 +80,12 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="https://github.com/CoreNovaLabs/CoreNovaLaunch"
+            href={l("/docs")}
             className="navbar__link"
-            target="_blank"
-            rel="noreferrer"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(l("/docs"));
+            }}
           >
             {t("docs")}
           </a>

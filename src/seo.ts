@@ -2,6 +2,7 @@ import type { AppCurrent, Locale, Localized } from "./data/types";
 import { APPS_BY_INDEX, siteScreenshotUrl } from "./data/generated";
 import { CATEGORIES } from "./data/categories";
 import { SOLUTIONS } from "./data/solutions";
+import { DOCS } from "./content/docs";
 import { APP_FAQ } from "./data/faq";
 import { dicts } from "./i18n";
 
@@ -203,6 +204,37 @@ function solutionDetailRoutes(): PrerenderRoute[] {
   );
 }
 
+function docsRoutes(): PrerenderRoute[] {
+  const index = LOCALES.map((lang) =>
+    listPageRoutes(
+      lang,
+      "/docs/",
+      lang === "zh" ? "文档 | CoreNova Launch" : "Documentation | CoreNova Launch",
+      "docs_subtitle",
+      t(lang, "docs_title")
+    )
+  );
+  const details = DOCS.flatMap((d) =>
+    LOCALES.map((lang) => {
+      const path = routePath(lang, `/docs/${d.slug}/`);
+      return {
+        path,
+        lang,
+        title: `${d.title} | ${BRAND}`,
+        description: d.excerpt,
+        jsonLd: [
+          breadcrumb([
+            { name: t(lang, "home"), path: routePath(lang) },
+            { name: t(lang, "docs_title"), path: routePath(lang, "/docs/") },
+            { name: d.title, path },
+          ]),
+        ],
+      };
+    })
+  );
+  return [...index, ...details];
+}
+
 export function enumerateRoutes(): PrerenderRoute[] {
   const apps = APPS_BY_INDEX.filter((a) => a.health === "passed");
   return [
@@ -240,5 +272,6 @@ export function enumerateRoutes(): PrerenderRoute[] {
     ...apps.flatMap(versionsRoutes),
     ...categoryRoutes(),
     ...solutionDetailRoutes(),
+    ...docsRoutes(),
   ];
 }

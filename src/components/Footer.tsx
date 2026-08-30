@@ -21,18 +21,16 @@ export function Footer() {
           <AppLink to="/apps">{t("browse")}</AppLink>
           <AppLink to="/updates">{t("updates")}</AppLink>
           <AppLink to="/solutions">{t("solutions")}</AppLink>
-          <AppLink to="/solutions">{t("pricing")}</AppLink>
         </div>
         <div className="footer__col">
           <div className="footer__col-title">{t("footer_resources")}</div>
-          <a href="https://github.com/CoreNovaLabs/CoreNovaLaunch" target="_blank" rel="noreferrer">
-            {t("footer_docs")}
-          </a>
-          <a href="https://github.com/CoreNovaLabs/CoreNovaLaunch" target="_blank" rel="noreferrer">
+          <AppLink to="/docs">{t("footer_docs")}</AppLink>
+          <a
+            href="https://github.com/CoreNovaLabs/CoreNovaLaunchVerify"
+            target="_blank"
+            rel="noreferrer"
+          >
             GitHub
-          </a>
-          <a href="https://github.com/CoreNovaLabs/CoreNovaLaunch/blob/main/LICENSE" target="_blank" rel="noreferrer">
-            {t("footer_license")}
           </a>
         </div>
         <div className="footer__col">

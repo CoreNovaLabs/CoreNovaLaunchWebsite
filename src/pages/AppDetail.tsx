@@ -161,11 +161,7 @@ export function AppDetail() {
                 className="btn btn--primary"
                 onClick={() => {
                   scrollTo("deployment");
-                  setDeployMsg(
-                    locale === "zh"
-                      ? "Mock：生产环境中此处会渲染你的 CloudFormation 模板并跳转 AWS 控制台。"
-                      : "Mock: in production this renders your CloudFormation template and opens the AWS console."
-                  );
+                  setDeployMsg(t("deploy_coming_soon"));
                 }}
               >
                 {t("deploy_now")} <ArrowRightIcon size={16} />
@@ -352,28 +348,13 @@ export function AppDetail() {
                   <div className="quick-deploy__field">
                     <label>Instance</label>
                     <select className="select">
-                      <option>t3.small</option>
-                      <option>t3.medium</option>
-                      <option>t3.large</option>
-                    </select>
-                  </div>
-                  <div className="quick-deploy__field">
-                    <label>Storage</label>
-                    <select className="select">
-                      <option>20 GB gp3</option>
-                      <option>40 GB gp3</option>
-                      <option>80 GB gp3</option>
+                      {/* 验证过的实例档来自 Manifest（deployment-contract §3），不前端编造 */}
+                      <option>{app.deploy.instance_type}</option>
                     </select>
                   </div>
                   <button
                     className="btn btn--primary quick-deploy__btn"
-                    onClick={() =>
-                      setDeployMsg(
-                        locale === "zh"
-                          ? "Mock：生产环境将生成参数化 CloudFormation 模板供你在自有 AWS 账号部署。"
-                          : "Mock: in production this generates a parameterized CloudFormation template for your own AWS account."
-                      )
-                    }
+                    onClick={() => setDeployMsg(t("template_coming_soon"))}
                   >
                     <DownloadIcon size={16} /> {t("generate_template")}
                   </button>

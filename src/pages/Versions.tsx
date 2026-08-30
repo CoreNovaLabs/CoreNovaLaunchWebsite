@@ -277,8 +277,34 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
           <div className="markdown">
             <p>
               {locale === "zh"
-                ? "生产环境中，点击 Deploy 将生成参数化 CloudFormation 模板，供你在自有 AWS 账号中一键部署。"
-                : "In production, clicking Deploy generates a parameterized CloudFormation template for one-click deployment in your own AWS account."}
+                ? "该版本经 CoreNova 验证的可部署事实如下（均来自 Verification Manifest，非页面推断）："
+                : "Deployable facts verified for this version (all from the Verification Manifest, not inferred by this page):"}
+            </p>
+            <ul>
+              <li>
+                {locale === "zh" ? "镜像（精确 tag@digest）：" : "Image (exact tag@digest): "}
+                <code>{m.container.image}@{m.container.digest.slice(0, 24)}…</code>
+              </li>
+              <li>
+                {locale === "zh" ? "容器端口：" : "Container port: "}
+                <code>{rec.current.deploy.container_port}</code>
+                {" · "}
+                {locale === "zh" ? "实例档：" : "instance: "}
+                <code>{rec.current.deploy.instance_type}</code>
+                {" · "}
+                {locale === "zh" ? "区域：" : "region: "}
+                <code>{rec.current.deploy.regions.join(", ")}</code>
+              </li>
+            </ul>
+            <p>
+              {locale === "zh"
+                ? "参数化 CloudFormation 模板生成即将推出；届时可一键在你自己的 AWS 账号内部署，部署端点由你掌控（非 CoreNova 托管）。"
+                : "Parameterized CloudFormation template generation is coming soon; it will one-click deploy into your own AWS account — the endpoint is yours, not CoreNova-hosted."}
+            </p>
+            <p>
+              <a href={rec.current.deploy.documentation_url} target="_blank" rel="noreferrer">
+                {locale === "zh" ? "上游官方文档 ↗" : "Upstream documentation ↗"}
+              </a>
             </p>
           </div>
         </div>

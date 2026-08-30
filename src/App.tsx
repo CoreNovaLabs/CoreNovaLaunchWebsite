@@ -8,6 +8,7 @@ import { Updates } from "./pages/Updates";
 import { Category } from "./pages/Category";
 import { Solutions } from "./pages/Solutions";
 import { SolutionDetail } from "./pages/SolutionDetail";
+import { DocsIndex, DocDetail } from "./pages/Docs";
 import { NotFound } from "./pages/NotFound";
 
 export default function App() {
@@ -23,6 +24,8 @@ export default function App() {
         <Route path="updates" element={<Updates />} />
         <Route path="solutions" element={<Solutions />} />
         <Route path="solutions/:slug" element={<SolutionDetail />} />
+        <Route path="docs" element={<DocsIndex />} />
+        <Route path="docs/:slug" element={<DocDetail />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
