@@ -58,7 +58,14 @@ const GENERATED_FILE = path.join(WEBSITE_ROOT, "src", "data", "generated.json");
 const ALLOW_STALE = process.argv.includes("--allow-stale");
 const GENERATED_EXISTS = fs.existsSync(GENERATED_FILE);
 
-const backend = (process.env.VERIFIED_BACKEND || "dir").trim().toLowerCase();
+// 公开只读端点（非密钥），作为 r2 后端的缺省值；显式 R2_PUBLIC_BASE_URL 优先。
+const DEFAULT_R2_PUBLIC = "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev";
+
+// Cloudflare Pages 构建（CF_PAGES=1）默认读 R2；本地开发默认读 Repo C 的 data/。
+// 仍可被 VERIFIED_BACKEND 显式覆盖。注意：不存在 r2→dir 的静默回退（§4.2.1）。
+const backend = (
+  process.env.VERIFIED_BACKEND || (process.env.CF_PAGES === "1" ? "r2" : "dir")
+).trim().toLowerCase();
 if (backend !== "dir" && backend !== "r2") {
   fail(`VERIFIED_BACKEND must be "dir" or "r2", got ${JSON.stringify(process.env.VERIFIED_BACKEND)}`);
 }
@@ -69,7 +76,7 @@ const DIR_SOURCE = path.resolve(
 );
 
 // r2 backend: HTTP against the public endpoint (same key layout as the dir backend).
-const R2_BASE = (process.env.R2_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
+const R2_BASE = (process.env.R2_PUBLIC_BASE_URL || DEFAULT_R2_PUBLIC).replace(/\/+$/, "");
 if (backend === "r2" && !R2_BASE) {
   fail('VERIFIED_BACKEND=r2 requires R2_PUBLIC_BASE_URL (e.g. https://pub-xxxx.r2.dev)');
 }
