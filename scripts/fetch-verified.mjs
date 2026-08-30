@@ -61,11 +61,15 @@ const GENERATED_EXISTS = fs.existsSync(GENERATED_FILE);
 // 公开只读端点（非密钥），作为 r2 后端的缺省值；显式 R2_PUBLIC_BASE_URL 优先。
 const DEFAULT_R2_PUBLIC = "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev";
 
-// Cloudflare Pages 构建（CF_PAGES=1）默认读 R2；本地开发默认读 Repo C 的 data/。
-// 仍可被 VERIFIED_BACKEND 显式覆盖。注意：不存在 r2→dir 的静默回退（§4.2.1）。
-const backend = (
-  process.env.VERIFIED_BACKEND || (process.env.CF_PAGES === "1" ? "r2" : "dir")
-).trim().toLowerCase();
+// 后端默认：任何 CI/云端构建（GitHub Actions 设 CI=true；Cloudflare 设 CF_PAGES*，
+// 新构建系统还设 CI_NAME=cloudflare_pages）默认读 R2；本地开发默认读 Repo C 的 data/。
+// 实测 Cloudflare 构建里 CF_PAGES 不一定是 "1"，故不能只认它。VERIFIED_BACKEND 显式值最优先；
+// 仍不存在 r2→dir 的失败回退（§4.2.1）。
+const IN_CI = Boolean(
+  process.env.CI || process.env.CF_PAGES || process.env.CF_PAGES_URL ||
+  process.env.CI_NAME === "cloudflare_pages"
+);
+const backend = (process.env.VERIFIED_BACKEND || (IN_CI ? "r2" : "dir")).trim().toLowerCase();
 if (backend !== "dir" && backend !== "r2") {
   fail(`VERIFIED_BACKEND must be "dir" or "r2", got ${JSON.stringify(process.env.VERIFIED_BACKEND)}`);
 }
