@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "verification_id": "ghost-v6.60.0-20260824-001",
+  "app": "ghost",
+  "app_version": "v6.60.0",
+  "release": {
+    "source_repo": "TryGhost/Ghost",
+    "source_revision": "beef5678abcd",
+    "release_tag": "v6.60.0",
+    "upstream_tag": "v6.60.0",
+    "image_reference": "ghost:6.60.0-alpine"
+  },
+  "container": {
+    "image": "ghost:6.60.0-alpine",
+    "digest": "sha256:2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+    "manifest_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "platform": "linux/amd64"
+  },
+  "platform": {
+    "platform_verification_id": "plat-us-east-1-x86_64-20260829-001",
+    "ami_id": "ami-0abc123def4567890",
+    "base_ami_source": "public",
+    "source_ami_name": "ubuntu/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*",
+    "region": "us-east-1",
+    "architecture": "x86_64"
+  },
+  "config": {
+    "app_config_revision": "deadbeef00000000000000000000000000000003",
+    "compose_revision": "deadbeef00000000000000000000000000000004"
+  },
+  "verification": {
+    "application": "passed",
+    "platform": "referenced",
+    "tests": "passed"
+  },
+  "checks": {
+    "compose_started": true,
+    "container_healthy": true,
+    "health_check_passed": true,
+    "tests_passed": true,
+    "screenshots_generated": true,
+    "screenshots_uploaded": true,
+    "report_uploaded": true,
+    "verification_manifest_uploaded": true,
+    "required_platform_contract_valid": true
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "scenario": "home",
+        "file": "home.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.60.0/home.png",
+        "caption": { "en": "Public site", "zh": "站点首页" }
+      }
+    ],
+    "report_url": "https://pub-example.r2.dev/reports/ghost-v6.60.0-20260824-001.html",
+    "workflow_run_url": "https://github.com/CoreNovaLabs/CoreNovaLaunchVerify/actions/runs/90"
+  },
+  "website": {
+    "app": "ghost",
+    "app_version": "v6.60.0",
+    "verification_id": "ghost-v6.60.0-20260824-001",
+    "verification_run_id": "90",
+    "platform_verification_id": "plat-us-east-1-x86_64-20260829-001",
+    "ami_id": "ami-0abc123def4567890",
+    "architecture": "x86_64",
+    "region": "us-east-1",
+    "display_name": { "en": "Ghost Blog", "zh": "Ghost 博客" },
+    "description": {
+      "en": "Open-source professional publishing platform",
+      "zh": "开源专业发布平台"
+    },
+    "category": "cms",
+    "icon": "/icons/ghost.svg",
+    "featured": true,
+    "tags": ["blog", "cms", "publishing"],
+    "features": [
+      { "en": "Automated testing before each release", "zh": "每次发布前自动化测试" }
+    ],
+    "health": "passed",
+    "status": "verified",
+    "verified_at": "2026-08-24T09:30:00Z",
+    "report_url": "https://pub-example.r2.dev/reports/ghost-v6.60.0-20260824-001.html",
+    "workflow_run_url": "https://github.com/CoreNovaLabs/CoreNovaLaunchVerify/actions/runs/90",
+    "screenshots_order": ["home"],
+    "deploy": {
+      "launch_url": "https://ghost.us-east-1.corenovalaunch.app",
+      "documentation_url": "https://ghost.org/docs/",
+      "regions": ["us-east-1"],
+      "instance_type": "t3.small",
+      "container_port": 2368,
+      "docker_image": "ghost:6.60.0-alpine"
+    },
+    "release": {
+      "type": "security_update",
+      "previous_version": "v6.59.0",
+      "type_evidence": "rule2: upstream release body matched \"security advisory\" and CVE-2026-1234"
+    },
+    "screenshots": [
+      {
+        "scenario": "home",
+        "file": "home.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.60.0/home.png",
+        "caption": { "en": "Public site", "zh": "站点首页" }
+      }
+    ]
+  },
+  "verification_run_id": "90",
+  "verified_at": "2026-08-24T09:30:00Z"
+}

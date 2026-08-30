@@ -1,0 +1,6 @@
+# CoreNova Launch · 网站数据契约镜像
+# Repo A 禁止读取 Repo C 的 apps/ 作为**验证事实源**（repo-structure.md §5 / deployment-contract §1）。
+# 本目录只镜像一个字段：source.repo —— 仅用于构建期抓取上游 GitHub Release Notes 与 stars，
+# 属 deployment-contract §1 的「上游元数据同步例外」，其结果不进 data/verified/**。
+source:
+  repo: "TryGhost/Ghost"

@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "verification_id": "ghost-v6.61.0-20260829-001",
+  "app": "ghost",
+  "app_version": "v6.61.0",
+  "release": {
+    "source_repo": "TryGhost/Ghost",
+    "source_revision": "abc123def456",
+    "release_tag": "v6.61.0",
+    "upstream_tag": "v6.61.0",
+    "image_reference": "ghost:6.61.0-alpine"
+  },
+  "container": {
+    "image": "ghost:6.61.0-alpine",
+    "digest": "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "manifest_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "platform": "linux/amd64"
+  },
+  "platform": {
+    "platform_verification_id": "plat-us-east-1-x86_64-20260829-001",
+    "ami_id": "ami-0abc123def4567890",
+    "base_ami_source": "public",
+    "source_ami_name": "ubuntu/images/hvm-ssd/ubuntu-noble-24.04-amd64-server-*",
+    "region": "us-east-1",
+    "architecture": "x86_64"
+  },
+  "config": {
+    "app_config_revision": "deadbeef00000000000000000000000000000001",
+    "compose_revision": "deadbeef00000000000000000000000000000002"
+  },
+  "verification": {
+    "application": "passed",
+    "platform": "referenced",
+    "tests": "passed"
+  },
+  "checks": {
+    "compose_started": true,
+    "container_healthy": true,
+    "health_check_passed": true,
+    "tests_passed": true,
+    "screenshots_generated": true,
+    "screenshots_uploaded": true,
+    "report_uploaded": true,
+    "verification_manifest_uploaded": true,
+    "required_platform_contract_valid": true
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "scenario": "home",
+        "file": "home.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.61.0/home.png",
+        "caption": { "en": "Public site", "zh": "站点首页" }
+      },
+      {
+        "scenario": "admin",
+        "file": "admin.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.61.0/admin.png",
+        "caption": { "en": "Admin dashboard", "zh": "管理后台" }
+      }
+    ],
+    "report_url": "https://pub-example.r2.dev/reports/ghost-v6.61.0-20260829-001.html",
+    "workflow_run_url": "https://github.com/CoreNovaLabs/CoreNovaLaunchVerify/actions/runs/100"
+  },
+  "website": {
+    "app": "ghost",
+    "app_version": "v6.61.0",
+    "verification_id": "ghost-v6.61.0-20260829-001",
+    "verification_run_id": "100",
+    "platform_verification_id": "plat-us-east-1-x86_64-20260829-001",
+    "ami_id": "ami-0abc123def4567890",
+    "architecture": "x86_64",
+    "region": "us-east-1",
+    "display_name": { "en": "Ghost Blog", "zh": "Ghost 博客" },
+    "description": {
+      "en": "Open-source professional publishing platform",
+      "zh": "开源专业发布平台"
+    },
+    "category": "cms",
+    "icon": "/icons/ghost.svg",
+    "featured": true,
+    "tags": ["blog", "cms", "publishing"],
+    "features": [
+      { "en": "Automated testing before each release", "zh": "每次发布前自动化测试" },
+      { "en": "SQLite or MySQL, one-click CloudFormation deploy", "zh": "SQLite 或 MySQL，CloudFormation 一键部署" }
+    ],
+    "health": "passed",
+    "status": "verified",
+    "verified_at": "2026-08-29T10:00:00Z",
+    "report_url": "https://pub-example.r2.dev/reports/ghost-v6.61.0-20260829-001.html",
+    "workflow_run_url": "https://github.com/CoreNovaLabs/CoreNovaLaunchVerify/actions/runs/100",
+    "screenshots_order": ["home", "admin"],
+    "deploy": {
+      "launch_url": "https://ghost.us-east-1.corenovalaunch.app",
+      "documentation_url": "https://ghost.org/docs/",
+      "regions": ["us-east-1"],
+      "instance_type": "t3.small",
+      "container_port": 2368,
+      "docker_image": "ghost:6.61.0-alpine"
+    },
+    "release": {
+      "type": "new_version",
+      "previous_version": "v6.60.0",
+      "type_evidence": "rule4: minor bump 6.60.0 -> 6.61.0, no security/CVE keyword in upstream release"
+    },
+    "screenshots": [
+      {
+        "scenario": "home",
+        "file": "home.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.61.0/home.png",
+        "caption": { "en": "Public site", "zh": "站点首页" }
+      },
+      {
+        "scenario": "admin",
+        "file": "admin.png",
+        "url": "https://pub-example.r2.dev/screenshots/ghost/v6.61.0/admin.png",
+        "caption": { "en": "Admin dashboard", "zh": "管理后台" }
+      }
+    ]
+  },
+  "verification_run_id": "100",
+  "verified_at": "2026-08-29T10:00:00Z"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-29T10:05:00Z",
+  "apps": [
+    {
+      "app": "ghost",
+      "app_version": "v6.61.0",
+      "verification_id": "ghost-v6.61.0-20260829-001",
+      "status": "verified",
+      "health": "passed",
+      "verified_at": "2026-08-29T10:00:00Z"
+    }
+  ]
+}

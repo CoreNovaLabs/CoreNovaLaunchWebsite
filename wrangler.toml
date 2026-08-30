@@ -1,0 +1,5 @@
+# Cloudflare Pages 配置（Repo A）。
+# 项目名与构建输出目录；实际部署由 .github/workflows/build-site.yml 调 wrangler pages deploy。
+name = "corenova-website"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "dist"

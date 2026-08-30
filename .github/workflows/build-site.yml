@@ -1,0 +1,69 @@
+# Repo A (CoreNovaLaunchWebsite) — 构建并部署官网到 Cloudflare Pages。
+#
+# 触发：
+#   - repository_dispatch(verified-update)：Repo C 发布新验证后通知（client_payload 仅作提示，数据一律从 R2 拉）。
+#   - workflow_dispatch：手动重建。
+#   - push 到 main：站点代码自身变更时重建。
+#
+# 数据源：R2 公开端点（VERIFIED_BACKEND=r2 + R2_PUBLIC_BASE_URL）。Repo A 只读 R2，不读 apps/、不读 Git verified。
+# 部署：wrangler pages deploy（需 CLOUDFLARE_API_TOKEN secret）。
+
+name: build-site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [verified-update]
+
+concurrency:
+  group: build-site
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      VERIFIED_BACKEND: r2
+      R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+      GITHUB_TOKEN: ${{ github.token }}
+      # success_rate 需要读 Repo C 的 Actions runs；VERIFY_REPO_SLUG 形如 <org>/CoreNovaLaunchVerify
+      VERIFY_REPO_SLUG: ${{ vars.VERIFY_REPO_SLUG }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      # prebuild 钩子会跑 scripts/fetch-verified.mjs（VERIFIED_BACKEND=r2 → 从 R2 公开端点拉）
+      - name: Build (fetch R2 + prerender)
+        run: npm run build
+
+      # 部署二选一：
+      #  A) 配置了 CLOUDFLARE_API_TOKEN → 用 wrangler-action 直接部署；
+      #  B) 未配置 → 跳过，改由 Cloudflare Pages「连接 Git 仓库」后在 push 时自动构建（无需 token）。
+      - name: Deploy to Cloudflare Pages (wrangler)
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ vars.PAGES_PROJECT_NAME || 'corenova-website' }}
+
+      - name: Note (no CF token)
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' }}
+        run: echo "未配置 CLOUDFLARE_API_TOKEN，跳过 wrangler 部署；应由 Cloudflare Pages Git 集成在 push 时构建。" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summary
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "rebuilt from verified-update: ${{ github.event.client_payload.verification_id }}" >> "$GITHUB_STEP_SUMMARY"
