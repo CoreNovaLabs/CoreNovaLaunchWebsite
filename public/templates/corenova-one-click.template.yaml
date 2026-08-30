@@ -183,7 +183,7 @@ Conditions:
     - Ref: TerminationProtection
     - Enabled
   UseSsmPublicAmi:
-    Equals:
+    Fn::Equals:
     - Ref: AmiId
     - ''
 Resources:
