@@ -4,6 +4,7 @@ import { useI18n, pick } from "../i18n";
 import { useApp, useVersions, useStars, orderedScreenshots } from "../data/useAppData";
 import { VerifiedBadge, ReleaseBadge, useLocalePath, PlatformBadge, IconAvatar } from "../components/ui";
 import { formatDate, timeAgo } from "../lib/format";
+import { ONE_CLICK_TEMPLATE_URL } from "../lib/deploy";
 import { useTitle } from "../lib/hooks";
 import { CATEGORIES } from "../data/categories";
 import { APP_FAQ } from "../data/faq";
@@ -78,7 +79,8 @@ export function AppDetail() {
   const shots = orderedScreenshots(app);
   const stars = useStars(app.app);
 
-  // Generate Template：用官方 one-click 模板 + 当前已验证版本的参数，打开 CloudFormation 创建向导。
+  // Generate Template：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
+  // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
   // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
   const generateDeploy = () => {
     const region = app.deploy.regions[0] || "us-east-1";
@@ -88,7 +90,7 @@ export function AppDetail() {
     const image = digest
       ? `${app.deploy.docker_image}@${digest}`
       : app.deploy.docker_image || app.app;
-    const templateUrl = `${window.location.origin}/templates/corenova-one-click.template.yaml`;
+    const templateUrl = ONE_CLICK_TEMPLATE_URL;
     let url =
       `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}` +
       `#/stacks/create/review?stackName=corenova-${app.app}` +
@@ -391,7 +393,7 @@ export function AppDetail() {
                     </button>
                     <a
                       className="section__link"
-                      href="/templates/corenova-one-click.template.yaml"
+                      href={ONE_CLICK_TEMPLATE_URL}
                       download
                     >
                       {t("download_template")}
