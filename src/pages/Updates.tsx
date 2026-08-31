@@ -3,7 +3,7 @@ import { useI18n, pick } from "../i18n";
 import { AppLink } from "../components/ui";
 import { useApps } from "../data/useAppData";
 import { versionRecords } from "../data/generated";
-import { VerifiedBadge, ReleaseBadge } from "../components/ui";
+import { VerifiedBadge, ReleaseBadge, IconAvatar } from "../components/ui";
 import { timeAgo } from "../lib/format";
 import { useTitle } from "../lib/hooks";
 import type { AppCurrent, AppVersionRecord, ReleaseType } from "../data/types";
@@ -108,7 +108,7 @@ export function Updates() {
             return (
               <div className="update-row" key={`${app.app}-${record.manifest.app_version}`}>
                 <div className="update-row__icon">
-                  {name.charAt(0)}
+                  <IconAvatar name={name} app={app.app} icon={app.icon} size={36} />
                 </div>
                 <div className="update-row__body">
                   <div className="update-row__line1">
