@@ -298,8 +298,8 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
             </ul>
             <p>
               {locale === "zh"
-                ? "在应用页点击 Generate Template，即用官方 one-click 模板把该 digest 钉住的版本部署到你自己的 AWS 账号（端点由你掌控，非 CoreNova 托管）。"
-                : "Use Generate Template on the app page — it deploys this digest-pinned version into your own AWS account via the official one-click template (the endpoint is yours, not CoreNova-hosted)."}
+                ? "在应用页点击「部署到 AWS」，即用官方 one-click 模板把该 digest 钉住的版本部署到你自己的 AWS 账号（端点由你掌控，非 CoreNova 托管）。"
+                : "Use Deploy on AWS on the app page — it deploys this digest-pinned version into your own AWS account via the official one-click template (the endpoint is yours, not CoreNova-hosted)."}
             </p>
             <p>
               <a href={rec.current.deploy.documentation_url} target="_blank" rel="noreferrer">

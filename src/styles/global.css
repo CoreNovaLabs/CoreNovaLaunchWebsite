@@ -1408,7 +1408,7 @@ button {
 }
 .quick-deploy__row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
   gap: var(--space-3);
   align-items: end;
 }

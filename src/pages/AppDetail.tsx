@@ -35,6 +35,8 @@ export function AppDetail() {
   const [zoom, setZoom] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [deployMsg, setDeployMsg] = useState("");
+  const [selectedInstanceType, setSelectedInstanceType] = useState("");
+  const [selectedDiskGb, setSelectedDiskGb] = useState(30);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useTitle(
@@ -73,13 +75,20 @@ export function AppDetail() {
     );
   }
 
+  // 初始化部署选项：verified 的实例档和磁盘大小作为默认值
+  useEffect(() => {
+    if (app && !selectedInstanceType) {
+      setSelectedInstanceType(app.deploy.instance_type);
+    }
+  }, [app, selectedInstanceType]);
+
   const name = pick(locale, app.display_name);
   const desc = pick(locale, app.description);
   const recent = versions.slice(0, 4);
   const shots = orderedScreenshots(app);
   const stars = useStars(app.app);
 
-  // Generate Template：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
+  // Deploy on AWS：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
   // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
   // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
   const generateDeploy = () => {
@@ -91,6 +100,7 @@ export function AppDetail() {
       ? `${app.deploy.docker_image}@${digest}`
       : app.deploy.docker_image || app.app;
     const templateUrl = ONE_CLICK_TEMPLATE_URL;
+    const instanceType = selectedInstanceType || app.deploy.instance_type;
     let url =
       `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}` +
       `#/stacks/create/review?stackName=corenova-${app.app}` +
@@ -98,7 +108,8 @@ export function AppDetail() {
       `&param_AppName=${encodeURIComponent(app.app)}` +
       `&param_ImageReference=${encodeURIComponent(image)}` +
       `&param_ContainerPort=${app.deploy.container_port}` +
-      `&param_InstanceType=${encodeURIComponent(app.deploy.instance_type)}`;
+      `&param_InstanceType=${encodeURIComponent(instanceType)}` +
+      `&param_DiskGb=${selectedDiskGb}`;
     const extra = app.deploy.extra_environment ?? [];
     if (extra.length > 0) {
       url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;
@@ -375,10 +386,29 @@ export function AppDetail() {
                     </select>
                   </div>
                   <div className="quick-deploy__field">
-                    <label>Instance</label>
-                    <select className="select">
-                      {/* 验证过的实例档来自 Manifest（deployment-contract §3），不前端编造 */}
-                      <option>{app.deploy.instance_type}</option>
+                    <label>{locale === "zh" ? "规格" : "Instance"}</label>
+                    <select
+                      className="select"
+                      value={selectedInstanceType}
+                      onChange={(e) => setSelectedInstanceType(e.target.value)}
+                    >
+                      {["t3.micro", "t3.small", "t3.medium", "t3.large", "t3.xlarge"].map((type) => (
+                        <option key={type} value={type}>
+                          {type}{type === app.deploy.instance_type ? " ✓" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="quick-deploy__field">
+                    <label>{locale === "zh" ? "磁盘 (GB)" : "Disk (GB)"}</label>
+                    <select
+                      className="select"
+                      value={selectedDiskGb}
+                      onChange={(e) => setSelectedDiskGb(Number(e.target.value))}
+                    >
+                      {[30, 50, 100, 200, 500].map((gb) => (
+                        <option key={gb} value={gb}>{gb} GB</option>
+                      ))}
                     </select>
                   </div>
                   <div className="quick-deploy__field quick-deploy__btn">
@@ -392,11 +422,11 @@ export function AppDetail() {
                       <DownloadIcon size={16} /> {t("generate_template")}
                     </button>
                     <a
-                      className="section__link"
+                      className="btn btn--outline"
                       href={ONE_CLICK_TEMPLATE_URL}
                       download
                     >
-                      {t("download_template")}
+                      <DownloadIcon size={16} /> {t("download_template")}
                     </a>
                   </div>
                 </div>

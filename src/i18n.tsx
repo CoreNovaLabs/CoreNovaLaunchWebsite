@@ -35,7 +35,7 @@ const en: Dict = {
   deploy_now: "Deploy Now",
   version_history: "Version History",
   quick_deploy: "Quick Deploy",
-  generate_template: "Generate Template",
+  generate_template: "Deploy on AWS",
   overview: "Overview",
   versions: "Versions",
   deployment: "Deployment",
@@ -94,7 +94,7 @@ const en: Dict = {
   docs_read: "Read",
   docs_empty: "Documentation is being written — check back soon.",
   deploy_hint:
-    "Pick a region below, then Generate Template — it creates the VPC + host in your own AWS account and deploys this verified version (about 10 minutes; AWS costs apply).",
+    "Pick a region below, then Deploy on AWS — it creates the VPC + host in your own AWS account and deploys this verified version (about 10 minutes; AWS costs apply).",
   template_console_hint:
     "Opening AWS CloudFormation with the official one-click template (VPC + host). The image is pinned to this version's verified digest, resources are created in your own account, and first boot takes about 5–10 minutes.",
   download_template: "Download template (YAML)",
@@ -164,7 +164,7 @@ const zh: Dict = {
   deploy_now: "立即部署",
   version_history: "版本历史",
   quick_deploy: "快速部署",
-  generate_template: "生成模板",
+  generate_template: "部署到 AWS",
   overview: "概览",
   versions: "版本",
   deployment: "部署",
@@ -219,7 +219,7 @@ const zh: Dict = {
   docs_read: "阅读",
   docs_empty: "文档编写中，敬请期待。",
   deploy_hint:
-    "在下方选择区域后点击 Generate Template——会在你自己的 AWS 账号里创建 VPC 与主机并部署该已验证版本（约 10 分钟，产生 AWS 费用）。",
+    "在下方选择区域后点击「部署到 AWS」——会在你自己的 AWS 账号里创建 VPC 与主机并部署该已验证版本（约 10 分钟，产生 AWS 费用）。",
   template_console_hint:
     "正在用官方 one-click 模板（VPC + 主机）打开 CloudFormation 创建向导，镜像已按本验证版本的 digest 钉住。资源创建在你自己的账号中，会产生 AWS 费用；首次装机约 5–10 分钟。",
   download_template: "下载模板（YAML）",
