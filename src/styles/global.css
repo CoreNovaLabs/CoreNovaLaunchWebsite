@@ -1609,11 +1609,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: var(--fw-extrabold);
-  font-size: 19px;
   flex-shrink: 0;
-  background: var(--brand);
+  overflow: hidden;
 }
 .update-row__body {
   flex: 1;
