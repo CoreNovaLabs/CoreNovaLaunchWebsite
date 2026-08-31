@@ -1,0 +1,489 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-31T01:26:22Z",
+  "backend": "dir",
+  "index": {
+    "schema_version": "1.0",
+    "apps": [
+      {
+        "app": "ghost",
+        "app_version": "v6.61.0",
+        "verification_id": "ghost-v6.61.0-20260829-003",
+        "status": "verified",
+        "health": "passed",
+        "verified_at": "2026-08-29T22:31:36Z"
+      }
+    ],
+    "generated_at": "2026-08-29T22:31:36Z"
+  },
+  "apps": [
+    {
+      "app": "ghost",
+      "app_version": "v6.61.0",
+      "verification_id": "ghost-v6.61.0-20260829-003",
+      "verification_run_id": "local-20260829223112",
+      "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+      "ami_id": "ami-0d7f022123f8ff19d",
+      "architecture": "x86_64",
+      "region": "us-east-1",
+      "display_name": {
+        "en": "Ghost Blog",
+        "zh": "Ghost 博客"
+      },
+      "description": {
+        "en": "Open-source professional publishing platform",
+        "zh": "开源专业发布平台"
+      },
+      "category": "cms",
+      "icon": "/icons/ghost.svg",
+      "featured": true,
+      "tags": [
+        "blog",
+        "cms",
+        "publishing"
+      ],
+      "features": [
+        {
+          "en": "Automated testing before each release",
+          "zh": "每次发布前自动化测试"
+        },
+        {
+          "en": "SQLite or MySQL, one-click CloudFormation deploy",
+          "zh": "SQLite 或 MySQL，CloudFormation 一键部署"
+        }
+      ],
+      "health": "passed",
+      "status": "verified",
+      "verified_at": "2026-08-29T22:31:36Z",
+      "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+      "workflow_run_url": "",
+      "screenshots_order": [
+        "home",
+        "admin"
+      ],
+      "deploy": {
+        "documentation_url": "https://ghost.org/docs/",
+        "regions": [
+          "us-east-1"
+        ],
+        "instance_type": "t3.small",
+        "container_port": 2368,
+        "docker_image": "ghost:6.61.0-alpine"
+      },
+      "release": {
+        "type": "new_version",
+        "previous_version": "v6.61.0",
+        "type_evidence": "rule4: minor/major change v6.61.0 -> (6, 61, 0)"
+      },
+      "screenshots": [
+        {
+          "scenario": "home",
+          "file": "home.png",
+          "url": "/screenshots/ghost/v6.61.0/home.png",
+          "caption": {
+            "en": "Public site",
+            "zh": "站点首页"
+          }
+        },
+        {
+          "scenario": "admin",
+          "file": "admin.png",
+          "url": "/screenshots/ghost/v6.61.0/admin.png",
+          "caption": {
+            "en": "Admin console",
+            "zh": "管理后台"
+          }
+        }
+      ]
+    }
+  ],
+  "versions": {
+    "ghost": [
+      {
+        "schema_version": "1.0",
+        "verification_id": "ghost-v6.61.0-20260829-003",
+        "app": "ghost",
+        "app_version": "v6.61.0",
+        "release": {
+          "source_repo": "TryGhost/Ghost",
+          "source_revision": "79edb8c3785a5710e156f84b33ccdca7798d1b9f",
+          "release_tag": "v6.61.0",
+          "upstream_tag": "v6.61.0",
+          "image_reference": "ghost:6.61.0-alpine"
+        },
+        "container": {
+          "image": "ghost:6.61.0-alpine",
+          "digest": "sha256:2899a194d2d4b2bac44caf37009ca2b76dd1c605282f7aca4c45899fb770975f",
+          "manifest_digest": "sha256:80e33b2c20aabb96e379ae26508f75f2b561cffbc24d081713ee96a7eb3b3c80",
+          "platform": "linux/amd64"
+        },
+        "platform": {
+          "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+          "ami_id": "ami-0d7f022123f8ff19d",
+          "base_ami_source": "public",
+          "source_ami_name": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*",
+          "region": "us-east-1",
+          "architecture": "x86_64"
+        },
+        "config": {
+          "app_config_revision": "29cebbd5cf4ab77b1598f8e0999bb7b465b67938",
+          "compose_revision": "66476bdaf9a8bf9d9d3a72b86e37f519e09bf355",
+          "tests_revision": "content-sha:d615e5768bec40bdf05009c98ae4953712c3ca30"
+        },
+        "verification": {
+          "application": "passed",
+          "platform": "referenced",
+          "tests": "passed"
+        },
+        "checks": {
+          "compose_started": true,
+          "container_healthy": true,
+          "health_check_passed": true,
+          "tests_passed": true,
+          "screenshots_generated": true,
+          "screenshots_uploaded": true,
+          "report_uploaded": true,
+          "verification_manifest_uploaded": true,
+          "required_platform_contract_valid": true
+        },
+        "artifacts": {
+          "screenshots": [
+            {
+              "scenario": "home",
+              "file": "home.png",
+              "url": "/screenshots/ghost/v6.61.0/home.png",
+              "caption": {
+                "en": "Public site",
+                "zh": "站点首页"
+              }
+            },
+            {
+              "scenario": "admin",
+              "file": "admin.png",
+              "url": "/screenshots/ghost/v6.61.0/admin.png",
+              "caption": {
+                "en": "Admin console",
+                "zh": "管理后台"
+              }
+            }
+          ],
+          "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+          "workflow_run_url": ""
+        },
+        "website": {
+          "app": "ghost",
+          "app_version": "v6.61.0",
+          "verification_id": "ghost-v6.61.0-20260829-003",
+          "verification_run_id": "local-20260829223112",
+          "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+          "ami_id": "ami-0d7f022123f8ff19d",
+          "architecture": "x86_64",
+          "region": "us-east-1",
+          "display_name": {
+            "en": "Ghost Blog",
+            "zh": "Ghost 博客"
+          },
+          "description": {
+            "en": "Open-source professional publishing platform",
+            "zh": "开源专业发布平台"
+          },
+          "category": "cms",
+          "icon": "/icons/ghost.svg",
+          "featured": true,
+          "tags": [
+            "blog",
+            "cms",
+            "publishing"
+          ],
+          "features": [
+            {
+              "en": "Automated testing before each release",
+              "zh": "每次发布前自动化测试"
+            },
+            {
+              "en": "SQLite or MySQL, one-click CloudFormation deploy",
+              "zh": "SQLite 或 MySQL，CloudFormation 一键部署"
+            }
+          ],
+          "health": "passed",
+          "status": "verified",
+          "verified_at": "2026-08-29T22:31:36Z",
+          "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+          "workflow_run_url": "",
+          "screenshots_order": [
+            "home",
+            "admin"
+          ],
+          "deploy": {
+            "launch_url": "https://ghost.us-east-1.corenovalaunch.app",
+            "documentation_url": "https://ghost.org/docs/",
+            "regions": [
+              "us-east-1"
+            ],
+            "instance_type": "t3.small",
+            "container_port": 2368,
+            "docker_image": "ghost:6.61.0-alpine"
+          },
+          "release": {
+            "type": "new_version",
+            "previous_version": "v6.61.0",
+            "type_evidence": "rule4: minor/major change v6.61.0 -> (6, 61, 0)"
+          },
+          "screenshots": [
+            {
+              "scenario": "home",
+              "file": "home.png",
+              "url": "/screenshots/ghost/v6.61.0/home.png",
+              "caption": {
+                "en": "Public site",
+                "zh": "站点首页"
+              }
+            },
+            {
+              "scenario": "admin",
+              "file": "admin.png",
+              "url": "/screenshots/ghost/v6.61.0/admin.png",
+              "caption": {
+                "en": "Admin console",
+                "zh": "管理后台"
+              }
+            }
+          ]
+        },
+        "verification_run_id": "local-20260829223112",
+        "verified_at": "2026-08-29T22:31:36Z"
+      }
+    ]
+  },
+  "releases": {
+    "ghost": [
+      {
+        "tag_name": "v6.61.0",
+        "name": "v6.61.0",
+        "published_at": "2026-08-27T10:12:47Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.61.0",
+        "body": "* ✨ Added email-able gift subscriptions and Portal gift sub links (#30331) - Kevin Ansfield\n* 🎨 Updated Source to v1.7.2 - Ghost CI\n* 🎨 Updated Casper to v5.12.2 - Ghost CI\n* 🎨 Improved resilience by skipping renders for disconnected clients (#30298) - Austin Burdine\n* 🐛 Fixed multi-domain email analytics cursors (#30294) - Aileen Booker\n* 🐛 Fixed email analytics fetchMissing crash on SQLite (#30244) - Sai Asish Y\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.60.0...v6.61.0"
+      },
+      {
+        "tag_name": "v6.60.0",
+        "name": "v6.60.0",
+        "published_at": "2026-08-25T15:30:37Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.60.0",
+        "body": "* ✨ Added new analytics fields to automations list (#30155) - Evan Hahn\n* 🎨 Updated Source to v1.7.2 - Ghost CI\n* 🎨 Updated Casper to v5.12.2 - Ghost CI\n* 🎨 Removed the gift card and email preview on mobile (#30262) - Weyland Swart\n* 🎨 Moved x402 adapter dependencies off of boot hotpath (#30266) - Austin Burdine\n* 🎨 Moved archiver off of boot hotpath (#30267) - Austin Burdine\n* 🎨 Improved gift date picker positioning (#30229) - Weyland Swart\n* 🎨 Improved theme upload dialog layout and copy (#30183) - Peter Zimon\n* 🎨 Formatted the repository with `oxfmt` (#30184) - Steve Larson\n* 🎨 Improved the emoji picker search field (#30140) - Weyland Swart\n* 🐛  Fixed dropped newsletter recipients when batch creation is interrupted (#30230) - Austin Burdine\n* 🐛 Fixed Safari automation row links (#30172) - Troy Ciesco\n* 🐛 Fixed cleanup behavior of batch email sending (#30169) - Austin Burdine\n* 🐛 Fixed log flushing on exit (#30165) - Austin Burdine\n* 🐛 Fixed Pintura config detection reading the wrong config path (#30145) - Steve Larson\n* 🐛 Fixed unsafe notification HTML (#29756) - Steve Larson\n* 🐛 Fixed inflated post counts on tags (#30108) - Michael Barrett\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.59.0...v6.60.0"
+      },
+      {
+        "tag_name": "v6.59.0",
+        "name": "v6.59.0",
+        "published_at": "2026-08-19T20:27:39Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.59.0",
+        "body": "* 🎨 Updated Source to v1.7.2 - Ghost CI\n* 🎨 Updated Casper to v5.12.2 - Ghost CI\n* 🐛 Fixed migrations failing on MySQL older than 8.0.28 (#30130) - Austin Burdine\n* 🐛 Fixed navigation markup changing for themes without the icons flag (#30129) - Austin Burdine\n* 🐛 Fixed header card asset exclusions (#30114) - Steve Larson\n* 🐛 Fixed negated newsletter filters being read as their opposite - Rob Lester\n* 🐛 Fixed donation checkout failing when the note label translation is too long - Rob Lester\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.58.0...v6.59.0"
+      },
+      {
+        "tag_name": "v6.58.0",
+        "name": "v6.58.0",
+        "published_at": "2026-08-18T16:07:25Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.58.0",
+        "body": "* ✨ Released the React member details screen - Rob Lester\n* ✨ Added support for Docker secrets to config loading (#29924) - Austin Burdine\n* 🎨 Improved automation canvas panning so the flow can't be lost off screen (#29962) - Zach\n* 🎨 Refined the React tag details screen (#29934) - Peter Zimon\n* 🎨 Changed the upgrade destination on host limits to be configurable (#29843) - Jannis Fedoruk-Betschki\n* 🎨 Improved Admin error messages to say what actually went wrong - Rob Lester\n* 🐛 Fixed .rpm and .deb files being rejected by the file upload card (#30061) - Steve Larson\n* 🐛 Fixed text filters losing values ending in a dollar sign - Rob Lester\n* 🐛 Fixed periodic host limits in Admin (#29837) - Jannis Fedoruk-Betschki\n* 🐛 Fixed redirecting outbound requests crashing Ghost (#30027) - Steve Larson\n* 🐛 Stopped automation runs when member unsubscribes (#29959) - Evan Hahn\n* 🐛 Fixed card assets busting caches on every Ghost restart (#29659) - James Loh\n* 🐛 Improved reliability of email analytics events (#29895) - Evan Hahn\n* 🐛 Fixed a members import silently dropping columns a short first row misses - Rob Lester\n* 🐛 Fixed the label dropdown running off the bottom of the screen - Renato Costa\n* 🐛 Fixed the members import mapping step on short screens - Renato Costa\n* 🐛 Fixed missing email notification when a member import fails - Rob Lester\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.57.1...v6.58.0"
+      },
+      {
+        "tag_name": "v6.57.1",
+        "name": "v6.57.1",
+        "published_at": "2026-08-10T20:39:48Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.57.1",
+        "body": "* 🐛 Fixed contrast_text_color returning incorrect text color for some light backgrounds (#29834) - Evans Juma\n* 🐛 Made the member.edited webhook fire on cancellation and reinstatement of paid plans (#29814) - Cathy Sarisky\n* 🐛 Fixed admin toolbar redirect loops on subdirectory sites (#29838) - louisghost\n* 🐛 Fixed missing tiers in previous part of webhook (#29810) - Cathy Sarisky\n* 🐛 Fixed theme settings reset when editing Source or Casper (#29839) - Kevin Ansfield\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.57.0...v6.57.1"
+      },
+      {
+        "tag_name": "v6.57.0",
+        "name": "v6.57.0",
+        "published_at": "2026-08-07T15:32:22Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.57.0",
+        "body": "* ✨ Added analytics for email sequences (#29765) - Evan Hahn\n* 🎨 Improved production docker build boot performance (#29790) - Austin Burdine\n* 🐛 Fixed Web analytics loading during slow Admin boot (#29779) - Steve Larson\n* 🐛 Fixed missing spaces when using multiple attributes in the link helper (#29594) - Oscar Hedvall\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.56.0...v6.57.0"
+      },
+      {
+        "tag_name": "v6.56.0",
+        "name": "v6.56.0",
+        "published_at": "2026-08-04T17:48:55Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.56.0",
+        "body": "* ✨ Added specific-tier option to editor preview (#29739) - Kevin Ansfield\n* 🎨 Improved tier select sizing in the post preview header (#29727) - Weyland Swart\n* 🎨 Added configurable search entries for billing (#29645) - Sag\n* 🐛 Fixed newsletter links containing a single quote being impossible to edit (#29650) - Michael Barrett\n* 🐛 Fixed SVG favicons not rendering in bookmark cards (#29732) - Princi Vershwal\n* 🐛 Fixed header cards losing their layout when imported from HTML (#29706) - Priyansh Nandwana\n* 🐛 Fixed keyboard focus trapping in empty comment threads (#29724) - Steve Larson\n* 🐛 Fixed 500 error when deleting posts with threaded comments (#29682) - Michael Barrett\n* 🐛 Fixed Stripe checkout failing for accounts with Managed Payments enabled (#29715) - Sag\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.55.0...v6.56.0"
+      },
+      {
+        "tag_name": "v6.55.0",
+        "name": "v6.55.0",
+        "published_at": "2026-07-31T16:17:29Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.55.0",
+        "body": "* 🎨 Changed the sidebar trial banner to be configurable via hostSettings (#29604) - Jannis Fedoruk-Betschki\n* 🐛 Fixed feature image alt text silently disappearing when too long (#29681) - SUHAIL\n* 🐛 Fixed members being removed from all newsletters when unsubscribing from one (#29605) - swithek\n* 🐛 Fixed site.substack.com links breaking when outbound link tagging is on (#29641) - leafwind\n* 🐛 Fixed settings sidebar flash for editors/contributors (#29660) - Jatinder Mahajan\n* 🐛 Fixed duplicate reply notification emails for comment authors (#29600) - Aubaid\n* 🐛 Fixed redirect capture groups ($1) not being substituted inside query strings (#29574) - Jannis Fedoruk-Betschki\n* 🐛 Fixed broken admin views for Contributor and Author staff users (#29653) - Steve Larson\n* 🐛 Fixed broken internal links in automation emails (#29652) - Troy Ciesco\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.54.1...v6.55.0"
+      },
+      {
+        "tag_name": "v6.54.1",
+        "name": "v6.54.1",
+        "published_at": "2026-07-27T20:46:05Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.54.1",
+        "body": "* 🐛 Fixed settings preview interaction regressions (#29618) - Steve Larson\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.54.0...v6.54.1"
+      },
+      {
+        "tag_name": "v6.54.0",
+        "name": "v6.54.0",
+        "published_at": "2026-07-24T15:43:16Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.54.0",
+        "body": "* 🔒 Made filename generation more secure, performant and resilient to filesystems' limits (#70) - Sag\n* ✨ Added config to specify custom adapter install location (#29487) - Austin Burdine\n* ✨ Added inline editor for redirects.yaml and routes.yaml (#29200) - Murat Çorlu\n* ✨ Added support for v4 (canary) schema - Naz\n* ✨ Added `member.avatar_image` for member gravatars in themes (#11584) - Kevin Ansfield\n* ✨Added labels for Members (#11538) - Rishabh Garg\n* ✨ Added complimentary member subscription (#11537) - Naz Gargol\n* ✨ Added posibility to accept html as an input source for post - Nazar Gargol\n* ✨  add storage base (#1) - Katharina Irrgang\n* 🎨 Removed unused base adapter shims (#29564) - Austin Burdine\n* 🎨 Changed pre-launch banner copy and link to be configurable via hostSettings (#29540) - Jannis Fedoruk-Betschki\n* 🎨 Updated settings chooser controls (#29503) - Steve Larson\n* 🎨 Further improved automation polling performance (#29477) - Evan Hahn\n* 🎨 Improved automation polling performance (#29476) - Evan Hahn\n* 🐛 Fixed unsafe output from the split helper (#29298) - Oscar Hedvall\n* 🐛 Fixed posts with a self-referential canonical URL being excluded from the sitemap - yash\n* 🐛 Fixed YouTube bookmark metadata (#29114) - Rayan Salhab\n* 🐛 Fixed a members import label containing a comma being split in two - Rob Lester\n* 🐛 Fixed members CSV import storing a formula-escape character in member data - Rob Lester\n* 🐛 Fixed members CSV import dropping columns from an uneven file - Rob Lester\n* 🐛 Fixed member custom field actions breaking history (#29506) - Steve Larson\n* 🐛 Fixed dark mode loader showing a white background (#29340) - sarafmudit\n* 🐛 Fixed incorrect audio durations after HTML import (#29337) - Kushida\n* 🐛 Fixed theme toggle crossfade in the standalone React admin (#29458) - Steve Larson\n* 🐛 Fixed extention missmatching .mp4 as invalid - Naz\n* 🐛 Fixed $id clash when validating across different API versions (#349) - naz\n* 🐛 Fixed CSV import json-schema email validation (#12239) - Fabien 'egg' O'Carroll\n* 🐛 Fixed validation error when adding tag from PSM - Nazar Gargol\n* 💡 Added canary api endpoint - Rish\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.53.0...v6.54.0"
+      },
+      {
+        "tag_name": "v6.53.0",
+        "name": "v6.53.0",
+        "published_at": "2026-07-17T15:43:14Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.53.0",
+        "body": "* ✨ Added boot-time validation functionality support for adapters (#29371) - Austin Burdine\n* ✨ Added user lookup dependency injection to sso base adapter (#29365) - Austin Burdine\n* ✨ Improved protection against spam member signups (#29319) - Steve Larson\n* 🎨 Improved author selection performance on sites with many staff users (#29044) - Kevin Ansfield\n* 🎨 Improved analytics chart bucketing for Year to date and All time ranges (#29237) - Steve Larson\n* 🐛 Fixed false unsaved warning in welcome email editor (#29389) - Steve Larson\n* 🐛 Fixed expired sessions leaving Admin stuck instead of returning to signin (#29328) - Steve Larson\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.52.1...v6.53.0"
+      },
+      {
+        "tag_name": "v6.52.1",
+        "name": "v6.52.1",
+        "published_at": "2026-07-10T16:03:23Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.52.1",
+        "body": "* 🐛 Fixed link selection in automations email editor (#29176) - Troy Ciesco\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.52.0...v6.52.1"
+      },
+      {
+        "tag_name": "v6.52.0",
+        "name": "v6.52.0",
+        "published_at": "2026-07-09T14:10:54Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.52.0",
+        "body": "* ✨ Added tax ID collection to Stripe checkout when automatic tax is enabled (#24682) - Jannis Fedoruk-Betschki\n* 🎨 Updated Source to v1.7.1 - Ghost CI\n* 🎨 Updated Casper to v5.12.1 - Ghost CI\n* 🎨 Removed the discontinued Tenor GIF provider (#29194) - Renato Costa\n* 🐛 Fixed mobile preview overflow (#29131) - Troy Ciesco\n* 🐛 Fixed unreadable tag & author colours with light accent colours (#29127) - Weyland Swart\n* 🐛 Fixed Top Posts stuck loading or hiding data when web analytics is off (#29103) - Steve Larson\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.51.0...v6.52.0"
+      },
+      {
+        "tag_name": "v6.51.0",
+        "name": "v6.51.0",
+        "published_at": "2026-07-03T15:54:54Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.51.0",
+        "body": "* ✨ Added Social Web handle preferences (#29042) - Vitrix\n* 🐛 Fixed complimentary subscription created when editing comped members (#28954) - Aubaid\n* 🐛 Fixed security action history entries (#29012) - Steve Larson\n* 🐛 Fixed email preview always showing the paywall on tier-restricted posts (#29059) - Steve Larson\n* 🐛 Fixed & refactored social link validators (#29051) - Steve Larson\n* 🐛 Fixed complimentary members being unable to upgrade on non-USD sites (#29055) - Peter Schulz\n* 🐛 Fixed orphaned Stripe prices when importing members by tier (#28955) - Aubaid\n* 🐛 Fixed posts/pages loading when analytics data was unavailable (#29048) - Steve Larson\n* 🐛 Fixed staff profile URL not updating after changing a user's slug (#29041) - Sag\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.50.0...v6.51.0"
+      },
+      {
+        "tag_name": "v6.50.0",
+        "name": "v6.50.0",
+        "published_at": "2026-07-02T12:31:26Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.50.0",
+        "body": "* ✨ Added publisher gift links (#29043) - Kevin Ansfield\n* ✨ Added configurable admin session max age (#26682) - Julien Millau\n* ✨ Added system appearance mode to Ghost Admin (#28911) - Weyland Swart\n* 🎨 Improved y-axis scaling and country names in Analytics (#28708) - Peter Zimon\n* 🎨 Improved share modal to clamp long post previews (#28966) - Weyland Swart\n* 🎨 Improved dark mode across Shade and Ghost admin (DES-1397) (#28895) - Peter Zimon\n* 🎨 Improved admin Comments page load time on large comment datasets (#28734) - Jonathon W. Marshall\n* 🐛 Prevented 'new' slug on tags to avoid route overlap (#28686) - Praveen Kumar  Singh\n* 🐛 Enabled link search in feature image caption and center caption text (#28730) - Dikshant Chaturvedi\n* 🐛 Fixed stored XSS and mangled structured data in JSON-LD output (#29013) - Steve Larson\n* 🐛 Fixed admin sidebar hidden behind legacy screens on mobile (#28956) - Jannis Fedoruk-Betschki\n* 🐛 Fixed hover-reveal View more buttons staying hidden on keyboard focus (#28929) - Dimitris Trechas\n* 🐛 Fixed bookmark favicon selection in oEmbed fallback (#28939) - Moc\n* 🐛 Made database views portable across environments - Rob Lester\n* 🐛 Fixed bookmark cards showing 'Amazon' as site name on .co domains (#28961) - Steve Larson\n* 🐛 Fixed flaky target delivery window batch-sending test (#28937) - Steve Larson\n* 🐛 Fixed Portal non-clickable rows areas and inconsistent keyboard focus - D̸̛̛̛͗̅͂̈́̃̏̒͐͋̓̾̅͂̃̊̉͆̄̏́͂̈́͗͒̓̒͛̈̅̓̄̔̓̈́͋̕̕̚̚͝usk\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.49.0...v6.50.0"
+      },
+      {
+        "tag_name": "v6.49.0",
+        "name": "v6.49.0",
+        "published_at": "2026-06-26T16:04:26Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.49.0",
+        "body": "* ✨ Added markdown and llms.txt support for AI tooling (#28931) - Hannah Wolfe\n* 🐛 Fixed profile picture button styling inconsistency (#28933) - Sviatoslav\n* 🐛 Fixed analytics Today view showing data points in the future (#28912) - Chris Raible\n* 🐛 Fixed dark mode in the automations email editor (#28914) - Weyland Swart\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.48.0...v6.49.0"
+      },
+      {
+        "tag_name": "v6.48.0",
+        "name": "v6.48.0",
+        "published_at": "2026-06-25T17:10:06Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.48.0",
+        "body": "* 🐛 Recovered newsletter sends interrupted by container restarts (#27822) - Steve Larson\n* 🐛 Fixed theme uploads freezing when folders are read-only (#28898) - Sag\n* 🐛 Fixed automation email formatting toolbar buttons (#28883) - Troy Ciesco\n* 🐛 Fixed automation editor flash on initial load (#28867) - Chris Raible\n* 🐛 Fixed Safari bug where automations list wasn't clickable (#28878) - Troy Ciesco\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.47.0...v6.48.0"
+      },
+      {
+        "tag_name": "v6.47.0",
+        "name": "v6.47.0",
+        "published_at": "2026-06-24T13:27:37Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.47.0",
+        "body": "* ✨ Enabled beta of automations feature (#28632) - Evan Hahn\n* 🎨 Improved theme validation modals (#28748) - Hannah Wolfe\n* 🐛 Fixed themes with custom error templates returning HTTP 500 (#28779) - Sag\n* 🐛 Improved upload error messages in the editor (#28723) - Michael Barrett\n* 🐛 Fixed Portal offer link infinite-spinner for active paid members (#28775) - Kevin Ansfield\n* 🐛 Fixed paid members on other tiers receiving gated newsletter content (#28315) - Steve Larson\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.46.0...v6.47.0"
+      },
+      {
+        "tag_name": "v6.46.0",
+        "name": "v6.46.0",
+        "published_at": "2026-06-19T16:17:04Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.46.0",
+        "body": "* ✨ Added long-press to open the posts list context menu on touch devices (#28602) - Steve Larson\n* 🎨 Removed `any` from activitypub (#28557) - Pedro Almeida\n* 🎨 Improved layout and alignment inconsistencies in mobile/tablet views (#24511) - Niranjan Uma Shankar\n* 🎨 Improved sidebar keyboard navigation accessibility (#25502) - Abdul Talha\n* 🐛 Fixed disabling structured data for LLMs and AI search engines (#28742) - Hannah Wolfe\n* 🐛 Fixed expired complimentary members not triggering webhooks (#28444) - Steve Larson\n* 🐛 Fixed newsletter feedback buttons breaking after a slug change (#28604) - Steve Larson\n* 🐛 Fixed paid checkout returning to homepage instead of originating page (#28485) - Steve Larson\n* 🐛 Fixed admin toolbar adding extra scroll to site pages (#28674) - Renato Costa\n* 🐛 Fixed vertical alignment of buttons in tier benefits (#28593) - Sviatoslav\n* 🐛 Fixed mobile admin nav bar reloading admin and its dark-mode active state (#28609) - Steve Larson\n* 🐛 Fixed Preview button being unavailable on mobile in the editor (#28601) - Steve Larson\n* 🐛 Fixed double-escaped tag names in social sharing meta tags (#28591) - swithek\n* 🐛 Fixed how Bookmark, Video and Audio cards look in RSS readers (#20452) - David Darnes\n* 🐛 Fixed silent importer failures by surfacing validation errors (#28546) - Ricardo Sawir\n* 🐛 Fixed accent color styles disappearing in Admin design preview (#24722) - fueko\n* 🐛 Fixed incorrect autocomplete token in Setup Form (#25975) - A11YRepair\n* 🐛 Fixed {{date}} helper rendering English for zh, zh-Hant, and pa locales (#24949) - Samarth Bagga\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.45.0...v6.46.0"
+      },
+      {
+        "tag_name": "v6.45.0",
+        "name": "v6.45.0",
+        "published_at": "2026-06-12T17:40:06Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.45.0",
+        "body": "* ✨ Added IndexNow to notify search engines of content changes (#28519) - Hannah Wolfe\n* 🎨 Updated Source to v1.7.1 - Ghost CI\n* 🎨 Updated Casper to v5.12.1 - Ghost CI\n* 🎨 Added translucent background to video controls to improve text contrast. (#25776) - Nathan\n* 🎨 Improved mobile tap behavior on Unsplash feature images (#24586) - Niranjan Uma Shankar\n* 🎨 Enabled nx cloud (#28512) - Steve Larson\n* 🎨 Improved spacing of the publish page on small screens (#25197) - Michele Lo Russo\n* 🎨 Added warning and filter for members with multiple active subscriptions (#28508) - Kevin Ansfield\n* 🎨 Improved sign-in to return you to the comment you were replying to (#28439) - Luis Azevedo\n* 🎨 Added event field to webhook payloads (#24499) - Stijn\n* 🎨 Changed offer links so they always open Portal's offer page (#28322) - Kevin Ansfield\n* 🎨 Prevented clearing site cache when draft posts are deleted (#22523) - Adithya Vardhan\n* 🎨 Improved E2E readiness checks (#28455) - Steve Larson\n* 🎨 Updated timezone settings to have DST-aware GMT offsets (#24557) - Niranjan Uma Shankar\n* 🎨 Enabled more detailed error message on creating insecure passwords (#18188) - Tom Tang\n* 🐛 Fixed Admin API post update saving a revision when save_revision=false (#26678) - Mark Stosberg\n* 🐛 Fixed support for bookmark card Amazon links (#25560) - Hajime Shiozawa\n* 🐛 Fixed search navigating away during CJK IME composition (#26878) - David Huang (Dave)\n* 🐛 Fixed comment counts for lazy loaded posts (#28545) - Jonatan Svennberg\n* 🐛 Fixed label mutation errors being silently swallowed in the label picker (#28510) - Rob Lester\n* 🐛 Fixed race condition in Unsplash search that causes mixed results (#24583) - Niranjan Uma Shankar\n* 🐛 Fixed dark mode fade effect on ActivityPub onboarding cards (#27550) - Ilya Dorman\n* 🐛 Fixed Offer creation redemptionCount error handling (#28016) - Asish kumar Dalal\n* 🐛 Fixed email preview scrollbar and keyboard accessibility (#25334) - Abdul Talha\n* 🐛 Fixed removed tags not showing in dropdown in editor sidebar (#25262) - Abdul Talha\n* 🐛 Wrapped long strings in post publish success modal (#25033) - Rajeshwar Singh\n* 🐛 Fixed duplicate replies when replying after opening a comment permalink (#28504) - Jonatan Svennberg\n* 🐛 Fixed \"check your email\" popup when logged-in paid members click checkout buttons (#28505) - Kevin Ansfield\n* 🐛 Fixed \"linked comment is no longer available\" error after unhiding a comment (#28493) - Luis Azevedo\n* 🐛 Fixed `X` button on user profile modal displaying on mobile (#24510) - Niranjan Uma Shankar\n* 🐛 Fixed notification sent when commenting or replying on own post (#24468) - Thomas Lamant\n* 🐛 Fixed non-deterministic member attribution resolution (#28491) - Steve Larson\n* 🐛 Fixed empty results while searching some keywords in /settings (#24461) - Niranjan Uma Shankar\n* 🐛 Fixed missing \"New member\" button on small viewports (#28484) - Peter Zimon\n* 🐛 Fixed block scalars being added to downloaded redirects (#28480) - Fabien O'Carroll\n* 🐛 Fixed comments auth-frame request when admin URL is missing - Rob Lester\n* 🐛 Fixed translation review never triggering on auto-labelled PRs (#28465) - Steve Larson\n* 🐛 Show hidden comments to admin when there are just hidden comments (#22915) - Kauê Buriti\n* 🐛 Stopped injecting portal when portal.url is set to 'false' in config file (#21936) - Ludovic Toinel\n* 🐛 Updated Portal to show message when no plans are available (#22512) - Adithya Vardhan\n* 🐛 Fixed members subscription filter for multi-sub members - Rob Lester\n* 🐛 Fixed \"Contact support\" link resulting in iframe error on the current tab (#24626) - Niranjan Uma Shankar\n* 🐛 Prevented \"Powered by Ghost\" from opening two tabs (#24623) - Niranjan Uma Shankar\n* 🐛 Fixed missing favicons in Ghost Admin (#28411) - Jonatan Svennberg\n* 🐛 Fixed incoming recommendations disappearing on transient errors (#26673) - Kevin Ansfield\n* 🐛 Fixed cut-off dropdowns in Membership settings during pre-launch mode (#28301) - Hannah Wolfe\n* 🐛 Fixed portal URL hash parsing to prevent crash (#26910) - Rohit Badakali\n* 🐛 Fixed LinkedIn URL validation rejecting URLs with a trailing slash (#28398) - jonhickman\n* 🐛 Fixed expired complimentary members not updating timestamps (#28399) - Steve Larson\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.44.1...v6.45.0"
+      },
+      {
+        "tag_name": "v6.44.1",
+        "name": "v6.44.1",
+        "published_at": "2026-06-05T16:35:44Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.44.1",
+        "body": "* 🎨 Include site title in members export filename (frontend) (#28358) - Puneet Dixit\n* 🎨 Included site name in members CSV export filename (#28362) - amal-hafis\n* 🐛 Fixed sidebar member count drifting out of sync with the members list (#28191) - Jonatan Svennberg\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.44.0...v6.44.1"
+      },
+      {
+        "tag_name": "v6.44.0",
+        "name": "v6.44.0",
+        "published_at": "2026-06-03T23:14:14Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.44.0",
+        "body": "* ✨ Added Klipy as a GIF provider alongside Tenor (#28109) - Renato Costa\n* 🎨 Updated Source to v1.7.0 - Ghost CI\n* 🎨 Updated Casper to v5.12.0 - Ghost CI\n* 🎨 Add archived tiers to tier filter (#28189) - Jonatan Svennberg\n* 🎨 Improved analytics CSV exports to include the site name (#28308) - Aileen Booker\n* 🐛 Fixed a typo in the integrations settings description (#28349) - Evan Hahn\n* 🐛 Fixed bookmark card favicons not loading after the first save (#28300) - Fabien O'Carroll\n* 🐛 Fixed staff invite error for existing users (#28294) - Aileen Booker\n* 🐛 Fixed design preview showing raw markdown when llms.txt is enabled (#28266) - Jannis Fedoruk-Betschki\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.43.1...v6.44.0"
+      },
+      {
+        "tag_name": "v6.43.1",
+        "name": "v6.43.1",
+        "published_at": "2026-05-29T21:39:33Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.43.1",
+        "body": "* 🐛 Fixed members-only 403 leaking when llms.txt is disabled (#28260) - Hannah Wolfe\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.43.0...v6.43.1"
+      },
+      {
+        "tag_name": "v6.43.0",
+        "name": "v6.43.0",
+        "published_at": "2026-05-29T16:51:00Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.43.0",
+        "body": "* ✨ Added relative date filters to members and comments (#27787) - Rob Lester\n* ✨ Added frontend admin toolbar (#28058) - John O'Nolan\n* 🐛 Fixed Mastodon social account field mangling input while typing (#28255) - Hannah Wolfe\n* 🐛 Fixed future filter date selection (#28256) - Jonatan Svennberg\n* 🐛 Fixed back navigation from post analytics member filters (#28252) - Jonatan Svennberg\n* 🐛 Fixed theme editor launch gate for allowlisted themes on limited plans (#27970) - Jannis Fedoruk-Betschki\n* 🐛 Fixed production builds using unpinned dependencies (#28240) - Steve Larson\n* 🐛 Fixed post analytics missing first-day traffic on later days (#28233) - Troy Ciesco\n* 🐛 Fixed false update state for API feature image captions  (#28107) - Aileen Booker\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.42.0...v6.43.0"
+      },
+      {
+        "tag_name": "v6.42.0",
+        "name": "v6.42.0",
+        "published_at": "2026-05-27T12:21:08Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.42.0",
+        "body": "* ✨ Released pinned comments - Jonatan Svennberg\n* ✨ Released threaded comments - Jonatan Svennberg\n* ✨ Added comment dislikes to member comments (#28021) - Jonatan Svennberg\n* 🐛 Fixed hyphen-separated permalink params (#28129) - Steve Larson\n* 🐛 Fixed comment thread connector lines occasionally appearing doubled (#28124) - Luis Azevedo\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.41.1...v6.42.0"
+      },
+      {
+        "tag_name": "v6.41.1",
+        "name": "v6.41.1",
+        "published_at": "2026-05-25T15:57:46Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.41.1",
+        "body": "* 🎨 Added unified pnpm test:watch across all Vitest packages (#28038) - Steve Larson\n* 🐛 Fixed crash in Redis adapter when storeConfig is not provided - Murat Çorlu\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.41.0...v6.41.1"
+      },
+      {
+        "tag_name": "v6.41.0",
+        "name": "v6.41.0",
+        "published_at": "2026-05-21T14:07:22Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.41.0",
+        "body": "* ✨ Added Danger Zone action to reset all authentication - Rob Lester\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.40.0...v6.41.0"
+      },
+      {
+        "tag_name": "v6.40.0",
+        "name": "v6.40.0",
+        "published_at": "2026-05-21T09:32:45Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.40.0",
+        "body": "* ✨ Added gift subscriptions - Michael Barrett\n* 🐛 Fixed uploads of .ogg that use application/ogg (#24505) - Nova Cat\n* 🐛 Fixed feature image button becoming unresponsive in Safari (#27993) - Michael Barrett\n* 🐛 Fixed HTML entities appearing in email publication dates (#27655) - Schalk Neethling\n* 🐛 Fix Instagram URL input clearing on mid-typing dot char (#27935) - Yahya Saqban\n* 🐛 Fixed Unsplash picker not opening on Settings pages (#27939) - Renato Costa\n* 🐛 Fixed broken oembeds on sites with many past embeds - Fabien O'Carroll\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.39.0...v6.40.0"
+      },
+      {
+        "tag_name": "v6.39.0",
+        "name": "v6.39.0",
+        "published_at": "2026-05-15T16:03:29Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.39.0",
+        "body": "* ✨ Changed comments to be enabled by default (#27913) - Hannah Wolfe\n* ✨ Added a built-in theme code editor (#27656) - John O'Nolan\n* 🎨 Migrated redirects download to YAML - Fabien O'Carroll\n* 🐛 Fixed {{#social_accounts}} emitting \"twitter\" as the type for X (#27871) - Hannah Wolfe\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.38.0...v6.39.0"
+      },
+      {
+        "tag_name": "v6.38.0",
+        "name": "v6.38.0",
+        "published_at": "2026-05-13T10:33:00Z",
+        "html_url": "https://github.com/TryGhost/Ghost/releases/tag/v6.38.0",
+        "body": "* ✨ Added {{#social_accounts}} block helper for theme social rendering (#27834) - Hannah Wolfe\n* 🐛 Fixed 500 error when updating members with nameless labels (#27789) - Rob Lester\n* 🐛 Fixed members API timing out on sites with large email_recipients tables - Rob Lester\n\n---\n\nView the changelog for full details: https://github.com/TryGhost/Ghost/compare/v6.37.1...v6.38.0"
+      }
+    ]
+  },
+  "stats": {
+    "schema_version": "1.0",
+    "generated_at": "2026-08-31T01:26:22Z",
+    "verified_app_count": 1,
+    "verified_version_count": 1,
+    "success_rate": null,
+    "github_stars": {
+      "ghost": 55087
+    },
+    "degraded": [
+      "success_rate"
+    ]
+  },
+  "screenshots": [
+    "/screenshots/ghost/v6.61.0/home.png",
+    "/screenshots/ghost/v6.61.0/admin.png"
+  ]
+}
