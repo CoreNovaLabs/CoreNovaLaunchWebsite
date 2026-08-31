@@ -36,11 +36,11 @@ export function SolutionDetail() {
     <section className="section">
       <div className="container">
         <nav className="breadcrumb">
-          <a href={l("/")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/")}>
             {t("home")}
           </a>
           <span className="sep">›</span>
-          <a href={l("/solutions")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/solutions")}>
             {t("solutions")}
           </a>
           <span className="sep">›</span>
@@ -68,7 +68,7 @@ export function SolutionDetail() {
               <span className="update-row__ver stack-list__version">
                 {a.app_version}
               </span>
-              <a className="link-blue" href={l(`/apps/${a.app}/`)} onClick={(e) => e.preventDefault()}>
+              <a className="link-blue" href={l(`/apps/${a.app}/`)}>
                 {t("deploy_now")} →
               </a>
             </li>

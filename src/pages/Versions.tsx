@@ -40,15 +40,15 @@ export function Versions() {
     <section className="section">
       <div className="container">
         <nav className="breadcrumb">
-          <a href={l("/")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/")}>
             {t("home")}
           </a>
           <span className="sep">›</span>
-          <a href={l("/apps")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/apps")}>
             {t("software")}
           </a>
           <span className="sep">›</span>
-          <a href={l(`/apps/${app.app}/`)} onClick={(e) => e.preventDefault()}>
+          <a href={l(`/apps/${app.app}/`)}>
             {name}
           </a>
           <span className="sep">›</span>
@@ -58,7 +58,7 @@ export function Versions() {
         <h1 className="page-title">{t("versions_title", { app: name })}</h1>
         <p className="page-subtitle">{t("versions_subtitle")}</p>
 
-        <a className="section__link" href={l(`/apps/${app.app}/`)} onClick={(e) => e.preventDefault()}>
+        <a className="section__link" href={l(`/apps/${app.app}/`)}>
           {t("back_to_app", { app: name })}
         </a>
 

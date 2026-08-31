@@ -159,11 +159,11 @@ export function AppDetail() {
       <div className="container">
         {/* breadcrumb */}
         <nav className="breadcrumb">
-          <a href={l("/")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/")}>
             {t("home")}
           </a>
           <span className="sep">›</span>
-          <a href={l("/apps")} onClick={(e) => e.preventDefault()}>
+          <a href={l("/apps")}>
             {t("software")}
           </a>
           <span className="sep">›</span>
@@ -441,7 +441,7 @@ export function AppDetail() {
         >
           <div className="section__head">
             <h2 className="heading--flush">{t("versions")}</h2>
-            <a className="section__link" href={l(`/apps/${app.app}/versions/`)} onClick={(e) => e.preventDefault()}>
+            <a className="section__link" href={l(`/apps/${app.app}/versions/`)}>
               {t("view_full_history")} <ArrowRightIcon size={14} />
             </a>
           </div>

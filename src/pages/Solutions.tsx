@@ -41,7 +41,6 @@ export function Solutions() {
               <a
                 className="link-blue"
                 href={l(`/solutions/${s.slug}/`)}
-                onClick={(e) => e.preventDefault()}
               >
                 {t("view_solution")} →
               </a>
