@@ -89,7 +89,7 @@ export function AppDetail() {
       ? `${app.deploy.docker_image}@${digest}`
       : app.deploy.docker_image || app.app;
     const templateUrl = `${window.location.origin}/templates/corenova-one-click.template.yaml`;
-    const url =
+    let url =
       `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}` +
       `#/stacks/create/review?stackName=corenova-${app.app}` +
       `&templateURL=${encodeURIComponent(templateUrl)}` +
@@ -97,6 +97,10 @@ export function AppDetail() {
       `&param_ImageReference=${encodeURIComponent(image)}` +
       `&param_ContainerPort=${app.deploy.container_port}` +
       `&param_InstanceType=${encodeURIComponent(app.deploy.instance_type)}`;
+    const extra = app.deploy.extra_environment ?? [];
+    if (extra.length > 0) {
+      url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;
+    }
     window.open(url, "_blank", "noopener");
     return url;
   };

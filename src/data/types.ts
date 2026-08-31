@@ -84,6 +84,7 @@ export interface Deploy {
   instance_type: string;
   container_port: number;
   docker_image: string;
+  extra_environment?: string[];
 }
 
 export interface ReleaseInfo {
