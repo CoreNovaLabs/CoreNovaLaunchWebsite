@@ -8,8 +8,7 @@ import { dicts } from "./i18n";
 
 // Build-time SEO metadata for prerendered routes (docs/website-design.md §4).
 // Consumed by scripts/prerender.mjs via src/entry-server.tsx.
-// TODO(生产部署): 换成正式域名。
-export const SITE_ORIGIN = "https://corenova-launch.pages.dev";
+export const SITE_ORIGIN = "https://corenova-website.pages.dev";
 
 const BRAND = "CoreNova Launch";
 const LOCALES: Locale[] = ["en", "zh"];
