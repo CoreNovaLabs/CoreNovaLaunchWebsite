@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useI18n } from "../i18n";
 import { useLocalePath } from "../components/ui";
 import { useTitle } from "../lib/hooks";
@@ -71,7 +72,7 @@ export function DocDetail() {
           <span>{doc.title}</span>
         </nav>
         <article className="markdown doc-article">
-          <Markdown>{doc.raw}</Markdown>
+          <Markdown remarkPlugins={[remarkGfm]}>{doc.raw}</Markdown>
         </article>
       </div>
     </section>
