@@ -13,20 +13,32 @@ export function Navbar() {
   const navigate = useNavigate();
   const l = useLocalePath();
   const [q, setQ] = useState("");
-  const [dark, setDark] = useState(
-    () =>
-      typeof document !== "undefined" &&
-      document.documentElement.getAttribute("data-theme") === "dark"
-  );
+  // SSR always renders light; after mount we adopt whatever the inline bootstrap
+  // script in index.html applied (localStorage / system preference). Reading it
+  // during the initial state instead would mismatch the prerendered markup.
+  const [dark, setDark] = useState(false);
+  const [themeReady, setThemeReady] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    setDark(document.documentElement.getAttribute("data-theme") === "dark");
+    setThemeReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!themeReady) return;
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
     try {
       localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
     } catch {
       // storage unavailable (private mode) — theme still applies for this page
     }
-  }, [dark]);
+  }, [dark, themeReady]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [loc.pathname]);
 
   const path = loc.pathname;
   const isActive = (p: string) => path.startsWith(`/${locale}${p}`);
@@ -47,6 +59,7 @@ export function Navbar() {
     { key: "browse", to: "/apps" },
     { key: "updates", to: "/updates" },
     { key: "solutions", to: "/solutions" },
+    { key: "docs", to: "/docs" },
   ];
 
   return (
@@ -79,16 +92,6 @@ export function Navbar() {
               {t(item.key)}
             </a>
           ))}
-          <a
-            href={l("/docs")}
-            className="navbar__link"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate(l("/docs"));
-            }}
-          >
-            {t("docs")}
-          </a>
         </nav>
         <div className="navbar__right">
           <form onSubmit={onSearch} className="navbar__search-wrap">
@@ -121,14 +124,43 @@ export function Navbar() {
           </div>
           <button
             className="navbar__icon-btn"
-            aria-label={dark ? "切换到浅色主题" : "切换到深色主题"}
+            aria-label={dark ? t("theme_light") : t("theme_dark")}
             aria-pressed={dark}
             onClick={() => setDark((d) => !d)}
           >
             {dark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
           </button>
+          <button
+            className="navbar__hamburger"
+            aria-label={mobileOpen ? t("close") : t("browse")}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((o) => !o)}
+          >
+            <span className={`navbar__hamburger-icon ${mobileOpen ? "is-open" : ""}`}>
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
         </div>
       </div>
+      {mobileOpen && (
+        <nav className="navbar__mobile-menu">
+          {navItems.map((item) => (
+            <a
+              key={item.key}
+              href={l(item.to)}
+              className={`navbar__mobile-link ${isActive(item.to) ? "is-active" : ""}`}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(l(item.to));
+              }}
+            >
+              {t(item.key)}
+            </a>
+          ))}
+        </nav>
+      )}
     </header>
   );
 }

@@ -77,6 +77,16 @@ export interface Screenshot {
   caption: Localized;
 }
 
+// Post-deployment guidance (app-schema rule 17): where the admin console lives and how
+// to get access. Copy only — never credentials. Absent for apps without an admin console
+// or records published before the contract existed; the frontend then renders only the
+// platform-generic steps and must not invent paths or credential hints (§3.2).
+export interface PostDeploy {
+  admin_path?: string; // e.g. "/ghost/"; starts with "/"
+  admin_setup?: Localized; // required alongside admin_path
+  notes?: Localized[];
+}
+
 export interface Deploy {
   launch_url: string;
   documentation_url: string;
@@ -85,6 +95,7 @@ export interface Deploy {
   container_port: number;
   docker_image: string;
   extra_environment?: string[];
+  post_deploy?: PostDeploy;
 }
 
 export interface ReleaseInfo {

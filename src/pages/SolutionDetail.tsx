@@ -56,7 +56,12 @@ export function SolutionDetail() {
         <p className="page-subtitle page-subtitle--narrow">
           {pick(locale, sol.description)}
         </p>
-        <button className="btn btn--primary solution-detail__deploy">
+        <button
+          className="btn btn--primary solution-detail__deploy"
+          onClick={() => {
+            document.querySelector(".stack-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
           {t("deploy_full_stack")}
         </button>
 

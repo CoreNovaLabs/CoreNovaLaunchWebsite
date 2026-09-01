@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T01:26:22Z",
+  "generated_at": "2026-09-01T01:14:51Z",
   "backend": "dir",
   "index": {
     "schema_version": "1.0",
@@ -8,21 +8,21 @@
       {
         "app": "ghost",
         "app_version": "v6.61.0",
-        "verification_id": "ghost-v6.61.0-20260829-003",
+        "verification_id": "ghost-v6.61.0-20260831-004",
         "status": "verified",
         "health": "passed",
-        "verified_at": "2026-08-29T22:31:36Z"
+        "verified_at": "2026-08-31T00:03:56Z"
       }
     ],
-    "generated_at": "2026-08-29T22:31:36Z"
+    "generated_at": "2026-09-01T01:14:22Z"
   },
   "apps": [
     {
       "app": "ghost",
       "app_version": "v6.61.0",
-      "verification_id": "ghost-v6.61.0-20260829-003",
-      "verification_run_id": "local-20260829223112",
-      "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+      "verification_id": "ghost-v6.61.0-20260831-004",
+      "verification_run_id": "local-20260831000321",
+      "platform_verification_id": "plat-us-east-1-x86_64-20260829-006",
       "ami_id": "ami-0d7f022123f8ff19d",
       "architecture": "x86_64",
       "region": "us-east-1",
@@ -54,21 +54,40 @@
       ],
       "health": "passed",
       "status": "verified",
-      "verified_at": "2026-08-29T22:31:36Z",
-      "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+      "verified_at": "2026-08-31T00:03:56Z",
+      "report_url": "/reports/ghost-v6.61.0-20260831-004.html",
       "workflow_run_url": "",
       "screenshots_order": [
         "home",
         "admin"
       ],
       "deploy": {
+        "launch_url": "https://ghost.us-east-1.corenovalaunch.app",
         "documentation_url": "https://ghost.org/docs/",
         "regions": [
           "us-east-1"
         ],
         "instance_type": "t3.small",
         "container_port": 2368,
-        "docker_image": "ghost:6.61.0-alpine"
+        "docker_image": "ghost:6.61.0-alpine",
+        "extra_environment": [
+          "database__client=sqlite3",
+          "database__connection__filename=/var/lib/ghost/content/data/ghost.db",
+          "database__useNullAsDefault=true"
+        ],
+        "post_deploy": {
+          "admin_path": "/ghost/",
+          "admin_setup": {
+            "en": "Open the admin path on first visit — the setup wizard walks you through creating the owner account. There are no preset credentials.",
+            "zh": "首次打开后台地址会进入初始化向导，按步骤创建站长账户；没有预置账号密码。"
+          },
+          "notes": [
+            {
+              "en": "Content is stored on the instance's data volume (/var/lib/ghost/content); back it up before terminating the instance.",
+              "zh": "内容保存在实例数据卷（/var/lib/ghost/content），终止实例前请先备份。"
+            }
+          ]
+        }
       },
       "release": {
         "type": "new_version",
@@ -79,7 +98,7 @@
         {
           "scenario": "home",
           "file": "home.png",
-          "url": "/screenshots/ghost/v6.61.0/home.png",
+          "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/home.png",
           "caption": {
             "en": "Public site",
             "zh": "站点首页"
@@ -88,7 +107,7 @@
         {
           "scenario": "admin",
           "file": "admin.png",
-          "url": "/screenshots/ghost/v6.61.0/admin.png",
+          "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/admin.png",
           "caption": {
             "en": "Admin console",
             "zh": "管理后台"
@@ -101,7 +120,7 @@
     "ghost": [
       {
         "schema_version": "1.0",
-        "verification_id": "ghost-v6.61.0-20260829-003",
+        "verification_id": "ghost-v6.61.0-20260831-004",
         "app": "ghost",
         "app_version": "v6.61.0",
         "release": {
@@ -118,7 +137,7 @@
           "platform": "linux/amd64"
         },
         "platform": {
-          "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+          "platform_verification_id": "plat-us-east-1-x86_64-20260829-006",
           "ami_id": "ami-0d7f022123f8ff19d",
           "base_ami_source": "public",
           "source_ami_name": "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*",
@@ -126,9 +145,9 @@
           "architecture": "x86_64"
         },
         "config": {
-          "app_config_revision": "29cebbd5cf4ab77b1598f8e0999bb7b465b67938",
+          "app_config_revision": "28be581cb1fc7e3d0ed8246b9c56bd999d869887",
           "compose_revision": "66476bdaf9a8bf9d9d3a72b86e37f519e09bf355",
-          "tests_revision": "content-sha:d615e5768bec40bdf05009c98ae4953712c3ca30"
+          "tests_revision": "aa9e9abdf2e361f1c981091c11dc6756e2dae021"
         },
         "verification": {
           "application": "passed",
@@ -151,7 +170,7 @@
             {
               "scenario": "home",
               "file": "home.png",
-              "url": "/screenshots/ghost/v6.61.0/home.png",
+              "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/home.png",
               "caption": {
                 "en": "Public site",
                 "zh": "站点首页"
@@ -160,22 +179,22 @@
             {
               "scenario": "admin",
               "file": "admin.png",
-              "url": "/screenshots/ghost/v6.61.0/admin.png",
+              "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/admin.png",
               "caption": {
                 "en": "Admin console",
                 "zh": "管理后台"
               }
             }
           ],
-          "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+          "report_url": "/reports/ghost-v6.61.0-20260831-004.html",
           "workflow_run_url": ""
         },
         "website": {
           "app": "ghost",
           "app_version": "v6.61.0",
-          "verification_id": "ghost-v6.61.0-20260829-003",
-          "verification_run_id": "local-20260829223112",
-          "platform_verification_id": "plat-us-east-1-x86_64-20260829-005",
+          "verification_id": "ghost-v6.61.0-20260831-004",
+          "verification_run_id": "local-20260831000321",
+          "platform_verification_id": "plat-us-east-1-x86_64-20260829-006",
           "ami_id": "ami-0d7f022123f8ff19d",
           "architecture": "x86_64",
           "region": "us-east-1",
@@ -207,8 +226,8 @@
           ],
           "health": "passed",
           "status": "verified",
-          "verified_at": "2026-08-29T22:31:36Z",
-          "report_url": "/reports/ghost-v6.61.0-20260829-003.html",
+          "verified_at": "2026-08-31T00:03:56Z",
+          "report_url": "/reports/ghost-v6.61.0-20260831-004.html",
           "workflow_run_url": "",
           "screenshots_order": [
             "home",
@@ -222,7 +241,25 @@
             ],
             "instance_type": "t3.small",
             "container_port": 2368,
-            "docker_image": "ghost:6.61.0-alpine"
+            "docker_image": "ghost:6.61.0-alpine",
+            "extra_environment": [
+              "database__client=sqlite3",
+              "database__connection__filename=/var/lib/ghost/content/data/ghost.db",
+              "database__useNullAsDefault=true"
+            ],
+            "post_deploy": {
+              "admin_path": "/ghost/",
+              "admin_setup": {
+                "en": "Open the admin path on first visit — the setup wizard walks you through creating the owner account. There are no preset credentials.",
+                "zh": "首次打开后台地址会进入初始化向导，按步骤创建站长账户；没有预置账号密码。"
+              },
+              "notes": [
+                {
+                  "en": "Content is stored on the instance's data volume (/var/lib/ghost/content); back it up before terminating the instance.",
+                  "zh": "内容保存在实例数据卷（/var/lib/ghost/content），终止实例前请先备份。"
+                }
+              ]
+            }
           },
           "release": {
             "type": "new_version",
@@ -233,7 +270,7 @@
             {
               "scenario": "home",
               "file": "home.png",
-              "url": "/screenshots/ghost/v6.61.0/home.png",
+              "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/home.png",
               "caption": {
                 "en": "Public site",
                 "zh": "站点首页"
@@ -242,7 +279,7 @@
             {
               "scenario": "admin",
               "file": "admin.png",
-              "url": "/screenshots/ghost/v6.61.0/admin.png",
+              "url": "https://pub-7abe6acc470447c0a101cc20ce10ceee.r2.dev/screenshots/ghost/v6.61.0/admin.png",
               "caption": {
                 "en": "Admin console",
                 "zh": "管理后台"
@@ -250,8 +287,8 @@
             }
           ]
         },
-        "verification_run_id": "local-20260829223112",
-        "verified_at": "2026-08-29T22:31:36Z"
+        "verification_run_id": "local-20260831000321",
+        "verified_at": "2026-08-31T00:03:56Z"
       }
     ]
   },
@@ -471,12 +508,12 @@
   },
   "stats": {
     "schema_version": "1.0",
-    "generated_at": "2026-08-31T01:26:22Z",
+    "generated_at": "2026-09-01T01:14:51Z",
     "verified_app_count": 1,
     "verified_version_count": 1,
     "success_rate": null,
     "github_stars": {
-      "ghost": 55087
+      "ghost": 55093
     },
     "degraded": [
       "success_rate"

@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useI18n, pick } from "../i18n";
 import { accentFor } from "../data/generated";
 import { useStars } from "../data/useAppData";
+import { useTimeAgo } from "../lib/hooks";
 import { CheckCircleIcon, GitCommitIcon, StarIcon } from "./Icons";
 import type { AppCurrent, ReleaseType, VerificationValue } from "../data/types";
+
+// Relative-time label safe for prerendered pages (see useTimeAgo).
+export function TimeAgo({ iso }: { iso: string }) {
+  const { locale } = useI18n();
+  return <>{useTimeAgo(iso, locale)}</>;
+}
 
 // Locale-prefixed link. `to` is a path WITHOUT the locale prefix, e.g. "/apps".
 export function useLocalePath() {
@@ -127,8 +134,8 @@ export function PlatformBadge({ platform }: { platform: VerificationValue }) {
 }
 
 // Horizontal app card used on list, category, solutions.
-export function AppCard({ app }: { app: AppCurrent }) {
-  const { locale } = useI18n();
+export const AppCard = memo(function AppCard({ app }: { app: AppCurrent }) {
+  const { locale, t } = useI18n();
   const l = useLocalePath();
   // stars come from data/stats.json (§5.1), never from current.json.
   const stars = useStars(app.app);
@@ -151,15 +158,15 @@ export function AppCard({ app }: { app: AppCurrent }) {
         </div>
       </div>
       <div className="app-card__deploy">
-        <span className="btn btn--primary btn--xs">Deploy</span>
+        <span className="btn btn--primary btn--xs">{t("deploy")}</span>
       </div>
     </Link>
   );
-}
+});
 
 // Vertical app card used on home featured grid.
-export function AppCardVertical({ app }: { app: AppCurrent }) {
-  const { locale } = useI18n();
+export const AppCardVertical = memo(function AppCardVertical({ app }: { app: AppCurrent }) {
+  const { locale, t } = useI18n();
   const l = useLocalePath();
   const name = pick(locale, app.display_name);
   return (
@@ -173,15 +180,15 @@ export function AppCardVertical({ app }: { app: AppCurrent }) {
         <p className="app-card__desc">{pick(locale, app.description)}</p>
         <div className="app-card__footer">
           <span className="app-card__version app-card__version--plain">{app.app_version}</span>
-          <span className="btn btn--outline btn--xs app-card__deploy-btn">Deploy</span>
+          <span className="btn btn--outline btn--xs app-card__deploy-btn">{t("deploy")}</span>
         </div>
       </div>
     </Link>
   );
-}
+});
 
-export function AppCardCompact({ app }: { app: AppCurrent }) {
-  const { locale } = useI18n();
+export const AppCardCompact = memo(function AppCardCompact({ app }: { app: AppCurrent }) {
+  const { locale, t } = useI18n();
   const l = useLocalePath();
   const name = pick(locale, app.display_name);
   return (
@@ -196,7 +203,7 @@ export function AppCardCompact({ app }: { app: AppCurrent }) {
         </div>
         <p className="app-card__desc">{pick(locale, app.description)}</p>
       </div>
-      <span className="link-blue">View</span>
+      <span className="link-blue">{t("view")}</span>
     </Link>
   );
-}
+});

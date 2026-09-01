@@ -3,8 +3,7 @@ import { useI18n, pick } from "../i18n";
 import { AppLink } from "../components/ui";
 import { useApps } from "../data/useAppData";
 import { versionRecords } from "../data/generated";
-import { VerifiedBadge, ReleaseBadge, IconAvatar } from "../components/ui";
-import { timeAgo } from "../lib/format";
+import { VerifiedBadge, ReleaseBadge, IconAvatar, TimeAgo } from "../components/ui";
 import { useTitle } from "../lib/hooks";
 import type { AppCurrent, AppVersionRecord, ReleaseType } from "../data/types";
 
@@ -123,7 +122,7 @@ export function Updates() {
                   {notes && <div className="update-row__summary">{notes}</div>}
                 </div>
                 <div className="update-row__time">
-                  {timeAgo(record.manifest.verified_at, locale)}
+                  <TimeAgo iso={record.manifest.verified_at} />
                 </div>
                 <div className="update-row__links">
                   <AppLink className="link-blue" to={`/apps/${app.app}/`}>

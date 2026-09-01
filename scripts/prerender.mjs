@@ -30,20 +30,21 @@ const zhUrlOf = (p) => `${SITE_ORIGIN}/zh/${restOf(p)}`;
 const siblingPath = (p) => (p.startsWith("/zh/") ? "/en/" + restOf(p) : "/zh/" + restOf(p));
 
 const routes = enumerateRoutes();
-const warnings = [];
 
 for (const route of routes) {
   const bodyHtml = renderRoute(route.path);
   const abs = SITE_ORIGIN + route.path;
 
+  // Function-form replacements: titles/descriptions are data, and a string
+  // replacement would re-interpret `$&` / `$'` sequences inside them.
   let page = template
-    .replace('<html lang="en">', `<html lang="${route.lang}">`)
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escAttr(route.title)}</title>`)
+    .replace('<html lang="en">', () => `<html lang="${route.lang}">`)
+    .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${escAttr(route.title)}</title>`)
     .replace(
       /<meta name="description"[^>]*>/,
-      `<meta name="description" content="${escAttr(route.description)}" />`
+      () => `<meta name="description" content="${escAttr(route.description)}" />`
     )
-    .replace('<div id="root"></div>', `<div id="root">${bodyHtml}</div>`);
+    .replace('<div id="root"></div>', () => `<div id="root">${bodyHtml}</div>`);
 
   const headExtras = [
     `<link rel="canonical" href="${abs}" />`,
@@ -57,6 +58,12 @@ for (const route of routes) {
     `<meta property="og:url" content="${abs}" />`,
     `<meta property="og:locale" content="${route.lang === "zh" ? "zh_CN" : "en_US"}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
+    ...(route.image
+      ? [
+          `<meta property="og:image" content="${escAttr(route.image)}" />`,
+          `<meta name="twitter:image" content="${escAttr(route.image)}" />`,
+        ]
+      : []),
     ...route.jsonLd.map(ldJson),
   ].join("\n    ");
 
@@ -74,6 +81,7 @@ for (const route of routes) {
 // bundle renders the NotFound route.
 fs.writeFileSync(path.join(dist, "404.html"), template);
 
+// x-default always points at the English page — in the <head> and here alike.
 const sitemapUrls = routes
   .map((r) => {
     const abs = SITE_ORIGIN + r.path;
@@ -82,7 +90,7 @@ const sitemapUrls = routes
     <loc>${abs}</loc>
     <xhtml:link rel="alternate" hreflang="${r.lang}" href="${abs}" />
     <xhtml:link rel="alternate" hreflang="${r.lang === "en" ? "zh" : "en"}" href="${sibling}" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${sibling}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${enUrlOf(r.path)}" />
   </url>`;
   })
   .join("\n");
@@ -95,7 +103,4 @@ fs.writeFileSync(
   `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ORIGIN}/sitemap.xml\n`
 );
 
-if (warnings.length) {
-  for (const w of warnings) console.warn("[prerender] " + w);
-}
 console.log(`[prerender] ${routes.length} routes, sitemap + robots written to dist/`);

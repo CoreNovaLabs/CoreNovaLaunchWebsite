@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import type { Locale, Localized } from "./data/types";
 
 type Dict = Record<string, string>;
@@ -46,6 +46,20 @@ const en: Dict = {
   release_notes: "Release Notes",
   deployment_guide: "Deployment Guide",
   stars: "Stars",
+  deploy: "Deploy",
+  view: "View",
+  details: "Details",
+  release_date: "Release Date",
+  status: "Status",
+  aws_tested: "AWS Tested",
+  actions: "Actions",
+  failed: "Failed",
+  instance_label: "Instance",
+  disk_gb_label: "Disk (GB)",
+  version_details: "Version Details",
+  application_label: "Application",
+  tests_label: "Tests",
+  no_release_notes: "No upstream release notes (not fetched at build time).",
   // browse / list
   browse_title: "Browse Software",
   browse_subtitle:
@@ -99,6 +113,26 @@ const en: Dict = {
     "Opening AWS CloudFormation with the official one-click template (VPC + host). The image is pinned to this version's verified digest, resources are created in your own account, and first boot takes about 5–10 minutes.",
   download_template: "Download template (YAML)",
   actions_run: "Actions run",
+  // deploy guide (standardized post-deployment instructions; per-app copy comes from
+  // deploy.post_deploy — deployment-contract §3.2, never invented by the frontend)
+  deploy_guide_title: "After you deploy",
+  deploy_guide_step1:
+    'The CloudFormation wizard opens with everything prefilled (stack "%{stack}") — review and click "Create stack".',
+  deploy_guide_step2:
+    "Wait until the stack status reaches CREATE_COMPLETE (about 10 minutes). Outputs are only visible after completion.",
+  deploy_guide_step3: "Open the stack's Outputs tab — everything you need is there:",
+  deploy_guide_step4: "Open the access URL in your browser — the app is ready to use.",
+  deploy_guide_admin_title: "Admin console",
+  deploy_guide_admin_entry: "Open your access URL followed by this path:",
+  deploy_guide_notes: "Good to know",
+  dg_out_launch_url: "Access URL — open this in your browser",
+  dg_out_public_ip: "The instance's public IP",
+  dg_out_public_dns: "The instance's public DNS name",
+  deploy_overview_title: "Deploy quick reference",
+  deploy_overview_access_from: "Stack Outputs → ResolvedLaunchUrl",
+  deploy_overview_ip_from: "Stack Outputs → PublicIp",
+  deploy_overview_admin_label: "Admin console",
+  deploy_overview_view_guide: "See the full step-by-step guide in Deployment",
   // updates page
   updates_title: "Updates",
   updates_subtitle: "Track the latest verified deployments across all software.",
@@ -132,6 +166,8 @@ const en: Dict = {
   region_roadmap: "More regions on the roadmap.",
   copyright: "© 2026 CoreNova Launch",
   not_found: "Page not found",
+  theme_light: "Switch to light theme",
+  theme_dark: "Switch to dark theme",
   bootstrap_notice:
     "Bootstrap data backend: this build was rendered from Repo C's local fixtures (VERIFIED_BACKEND=dir), not from Cloudflare R2 yet.",
 };
@@ -175,6 +211,20 @@ const zh: Dict = {
   release_notes: "发布说明",
   deployment_guide: "部署指南",
   stars: "Stars",
+  deploy: "部署",
+  view: "查看",
+  details: "详情",
+  release_date: "发布日期",
+  status: "状态",
+  aws_tested: "AWS 测试",
+  actions: "操作",
+  failed: "失败",
+  instance_label: "规格",
+  disk_gb_label: "磁盘 (GB)",
+  version_details: "版本详情",
+  application_label: "应用验证",
+  tests_label: "测试",
+  no_release_notes: "暂无上游 Release Notes（构建期未取到）。",
   browse_title: "浏览软件",
   browse_subtitle: "浏览全部经过预验证、可一键部署的开源软件。",
   sort_by: "排序",
@@ -224,6 +274,25 @@ const zh: Dict = {
     "正在用官方 one-click 模板（VPC + 主机）打开 CloudFormation 创建向导，镜像已按本验证版本的 digest 钉住。资源创建在你自己的账号中，会产生 AWS 费用；首次装机约 5–10 分钟。",
   download_template: "下载模板（YAML）",
   actions_run: "Actions 运行",
+  // 部署后指引（标准化文案；各应用差异部分来自 deploy.post_deploy，前端不得自造）
+  deploy_guide_title: "部署完成后",
+  deploy_guide_step1:
+    "CloudFormation 创建向导已预填全部参数（栈名 \"%{stack}\"）——确认后点击「创建堆栈」。",
+  deploy_guide_step2:
+    "等待栈状态变为 CREATE_COMPLETE（约 10 分钟）。创建完成后才能看到 Outputs。",
+  deploy_guide_step3: "打开栈的 Outputs 标签，你需要的信息都在这里：",
+  deploy_guide_step4: "在浏览器打开访问地址，应用即可使用。",
+  deploy_guide_admin_title: "管理后台",
+  deploy_guide_admin_entry: "在访问地址后拼接该路径打开：",
+  deploy_guide_notes: "注意事项",
+  dg_out_launch_url: "访问地址——在浏览器打开它",
+  dg_out_public_ip: "实例公网 IP",
+  dg_out_public_dns: "实例公网 DNS 名称",
+  deploy_overview_title: "部署速览",
+  deploy_overview_access_from: "栈 Outputs → ResolvedLaunchUrl",
+  deploy_overview_ip_from: "栈 Outputs → PublicIp",
+  deploy_overview_admin_label: "管理后台",
+  deploy_overview_view_guide: "到「部署」查看完整分步指引",
   updates_title: "更新",
   updates_subtitle: "追踪所有软件的最新已验证部署。",
   filter_all: "全部",
@@ -252,6 +321,8 @@ const zh: Dict = {
   region_roadmap: "更多区域在路线图中。",
   copyright: "© 2026 CoreNova Launch",
   not_found: "页面未找到",
+  theme_light: "切换到浅色主题",
+  theme_dark: "切换到深色主题",
   bootstrap_notice: "引导期数据后端：本次构建取自 Repo C 的本地 fixtures（VERIFIED_BACKEND=dir），尚未接入 Cloudflare R2。",
 };
 
@@ -271,17 +342,22 @@ export function I18nProvider({
   locale: Locale;
   children: ReactNode;
 }) {
-  const t = (key: string, vars?: Record<string, string | number>): string => {
-    let s = dicts[locale][key] ?? dicts.en[key] ?? key;
-    if (vars) {
-      for (const [k, v] of Object.entries(vars)) {
-        s = s.replace(`%{${k}}`, String(v));
+  const value = useMemo<I18nValue>(() => {
+    const dict = dicts[locale];
+    const enDict = dicts.en;
+    const t = (key: string, vars?: Record<string, string | number>): string => {
+      let s = dict[key] ?? enDict[key] ?? key;
+      if (vars) {
+        for (const [k, v] of Object.entries(vars)) {
+          s = s.split(`%{${k}}`).join(String(v));
+        }
       }
-    }
-    return s;
-  };
+      return s;
+    };
+    return { locale, t };
+  }, [locale]);
   return (
-    <I18nContext.Provider value={{ locale, t }}>
+    <I18nContext.Provider value={value}>
       {children}
     </I18nContext.Provider>
   );
@@ -293,7 +369,7 @@ export function useI18n(): I18nValue {
   return ctx;
 }
 
-// Pick a localized string by current locale.
+// Pick a localized string by current locale, falling back to English.
 export function pick(locale: Locale, l: Localized): string {
-  return l[locale];
+  return l[locale] ?? l.en ?? "";
 }

@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useI18n, pick } from "../i18n";
 import { useApps, useStats } from "../data/useAppData";
-import { AppCardVertical, IconAvatar, ReleaseBadge, useLocalePath, VerifiedBadge } from "../components/ui";
+import { AppCardVertical, IconAvatar, ReleaseBadge, useLocalePath, VerifiedBadge, TimeAgo } from "../components/ui";
 import { HeroArt } from "../components/HeroArt";
-import { timeAgo } from "../lib/format";
 import { useTitle } from "../lib/hooks";
 import {
   ArrowRightIcon,
@@ -232,7 +231,7 @@ export function Home() {
                 </div>
                 <div className="update-row__summary">{pick(locale, a.description)}</div>
                 <ReleaseBadge type={a.release.type} />
-                <div className="update-row__time">{timeAgo(a.verified_at, locale)}</div>
+                <div className="update-row__time"><TimeAgo iso={a.verified_at} /></div>
               </div>
             ))}
           </div>

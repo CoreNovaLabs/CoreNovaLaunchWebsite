@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Outlet, useParams } from "react-router-dom";
-import { I18nProvider, useI18n } from "../i18n";
-import type { Locale } from "../data/types";
+import { useI18n } from "../i18n";
 import { DATA_BACKEND } from "../data/generated";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
@@ -25,15 +24,12 @@ function Shell() {
   );
 }
 
+// I18nProvider lives in App so the catch-all NotFound route (outside this
+// layout) has a provider too.
 export function Layout() {
   const { lang } = useParams();
   if (lang !== "en" && lang !== "zh") {
     return <Navigate to="/en" replace />;
   }
-  return (
-    // key forces a clean remount when the locale changes
-    <I18nProvider locale={lang as Locale} key={lang}>
-      <Shell />
-    </I18nProvider>
-  );
+  return <Shell />;
 }

@@ -4,8 +4,10 @@ import Markdown from "react-markdown";
 import { useI18n, pick } from "../i18n";
 import { useApp, useVersions } from "../data/useAppData";
 import { VerifiedBadge, ReleaseBadge, PlatformBadge, useLocalePath } from "../components/ui";
+import { DeployGuide } from "../components/DeployGuide";
 import { CheckCircleIcon } from "../components/Icons";
 import { formatDate } from "../lib/format";
+import { buildDeployUrl } from "../lib/deploy";
 import { useTitle } from "../lib/hooks";
 import { CHECK_ROWS } from "../data/types";
 import type { AppVersionRecord } from "../data/types";
@@ -21,7 +23,9 @@ export function Versions() {
 
   useTitle(
     app
-      ? `${pick(locale, app.display_name)} Versions - Verified Release History | CoreNova Launch`
+      ? locale === "zh"
+        ? `${pick(locale, app.display_name)} 版本历史 - 已验证发布记录 | CoreNova Launch`
+        : `${pick(locale, app.display_name)} Versions - Verified Release History | CoreNova Launch`
       : "Versions | CoreNova Launch"
   );
 
@@ -66,11 +70,11 @@ export function Versions() {
           <thead>
             <tr>
               <th>{t("versions")}</th>
-              <th>{locale === "zh" ? "发布日期" : "Release Date"}</th>
+              <th>{t("release_date")}</th>
               <th>{t("verified")}</th>
-              <th>{locale === "zh" ? "状态" : "Status"}</th>
-              <th>{locale === "zh" ? "AWS 测试" : "AWS Tested"}</th>
-              <th>{locale === "zh" ? "操作" : "Actions"}</th>
+              <th>{t("status")}</th>
+              <th>{t("aws_tested")}</th>
+              <th>{t("actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,8 +96,28 @@ export function Versions() {
                     </td>
                     <td>
                       <div className="vrow-actions">
-                        <button className="btn btn--primary btn--sm">
-                          {locale === "zh" ? "Deploy" : "Deploy"}
+                        {/* Deep link pinned to THIS row's verified digest (§3.2). */}
+                        <button
+                          className="btn btn--primary btn--sm"
+                          onClick={() => {
+                            const d = rec.current.deploy;
+                            window.open(
+                              buildDeployUrl({
+                                app: app.app,
+                                dockerImage: d.docker_image,
+                                digest: m.container.digest,
+                                containerPort: d.container_port,
+                                region: d.regions[0] || "us-east-1",
+                                instanceType: d.instance_type,
+                                diskGb: 30,
+                                extraEnvironment: d.extra_environment,
+                              }),
+                              "_blank",
+                              "noopener"
+                            );
+                          }}
+                        >
+                          {t("deploy")}
                         </button>
                         <button
                           className="btn btn--ghost btn--sm"
@@ -101,7 +125,7 @@ export function Versions() {
                             setExpanded(expanded === m.app_version ? null : m.app_version)
                           }
                         >
-                          {locale === "zh" ? "Details" : "Details"}
+                          {t("details")}
                         </button>
                       </div>
                     </td>
@@ -141,6 +165,7 @@ function CheckRow({
   phase: string;
   locale: "en" | "zh";
 }) {
+  const { t } = useI18n();
   return (
     <div className="test-card">
       <span className="test-card__icon" style={ok ? undefined : { color: "var(--error)" }}>
@@ -149,7 +174,7 @@ function CheckRow({
       <div>
         <div className="test-card__name">{label}</div>
         <div className="test-card__status" style={ok ? undefined : { color: "var(--error)" }}>
-          {ok ? (locale === "zh" ? "通过" : "Passed") : locale === "zh" ? "失败" : "Failed"}
+          {ok ? t("passed") : t("failed")}
         </div>
         <div className="test-card__time">{phaseLabel(phase, locale)}</div>
       </div>
@@ -158,14 +183,14 @@ function CheckRow({
 }
 
 function VerificationSummary({ rec }: { rec: AppVersionRecord }) {
-  const { locale } = useI18n();
+  const { t } = useI18n();
   const v = rec.manifest.verification;
   // verification.* and checks.* are reported side by side and never derived from each
   // other (deployment-contract §3.1 last rule).
   const rows: { key: string; label: string; value: string }[] = [
-    { key: "application", label: locale === "zh" ? "应用验证" : "Application", value: v.application },
-    { key: "platform", label: locale === "zh" ? "平台验证" : "Platform", value: v.platform },
-    { key: "tests", label: locale === "zh" ? "测试" : "Tests", value: v.tests },
+    { key: "application", label: t("application_label"), value: v.application },
+    { key: "platform", label: t("platform"), value: v.platform },
+    { key: "tests", label: t("tests_label"), value: v.tests },
   ];
   return (
     <ul className="checklist">
@@ -185,14 +210,10 @@ function VerificationSummary({ rec }: { rec: AppVersionRecord }) {
 }
 
 function ReleaseNotesPanel({ rec }: { rec: AppVersionRecord }) {
-  const { locale } = useI18n();
+  const { t } = useI18n();
   if (!rec.release_notes.trim()) {
     // Upstream release notes are an optional metadata sync; degraded = empty, not fake.
-    return (
-      <p className="info-card__label">
-        {locale === "zh" ? "暂无上游 Release Notes（构建期未取到）。" : "No upstream release notes (not fetched at build time)."}
-      </p>
-    );
+    return <p className="info-card__label">{t("no_release_notes")}</p>;
   }
   return (
     <div className="markdown">
@@ -210,7 +231,7 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
     <div className="vdetail">
       <div className="vdetail__head">
         <span className="vdetail__title">
-          {locale === "zh" ? "版本详情" : "Version Details"}: {m.app_version}
+          {t("version_details")}: {m.app_version}
         </span>
         <div className="vdetail__tabs">
           {DETAIL_TABS.map((id) => (
@@ -256,7 +277,7 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
               <li key={row.key}>
                 <span>{row.label}</span>
                 <span className={m.checks[row.key] ? "check-ok" : "check-fail"}>
-                  {m.checks[row.key] ? "Passed" : "Failed"}
+                  {m.checks[row.key] ? t("passed") : t("failed")}
                 </span>
               </li>
             ))}
@@ -273,7 +294,7 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
       )}
       {tab === "deployment_guide" && (
         <div className="vdetail__panel">
-          <h4>{locale === "zh" ? "部署指南" : "Deployment Guide"}</h4>
+          <h4>{t("deployment_guide")}</h4>
           <div className="markdown">
             <p>
               {locale === "zh"
@@ -297,16 +318,13 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
               </li>
             </ul>
             <p>
-              {locale === "zh"
-                ? "在应用页点击「部署到 AWS」，即用官方 one-click 模板把该 digest 钉住的版本部署到你自己的 AWS 账号（端点由你掌控，非 CoreNova 托管）。"
-                : "Use Deploy on AWS on the app page — it deploys this digest-pinned version into your own AWS account via the official one-click template (the endpoint is yours, not CoreNova-hosted)."}
-            </p>
-            <p>
               <a href={rec.current.deploy.documentation_url} target="_blank" rel="noreferrer">
                 {locale === "zh" ? "上游官方文档 ↗" : "Upstream documentation ↗"}
               </a>
             </p>
           </div>
+          {/* 标准化部署后指引（与详情页同一数据源/组件，消灭重复文案） */}
+          <DeployGuide app={rec.current} />
         </div>
       )}
     </div>

@@ -25,6 +25,8 @@ export interface PrerenderRoute {
   title: string;
   description: string;
   jsonLd: unknown[];
+  // Absolute URL for og:image / twitter:image; omitted when the page has none.
+  image?: string;
 }
 
 function breadcrumb(items: { name: string; path: string }[]) {
@@ -99,6 +101,10 @@ function appDetailRoutes(app: AppCurrent): PrerenderRoute[] {
         lang === "zh"
           ? `${L(app.description, lang)}。预验证开源软件，AWS 一键部署。`
           : `${L(app.description, lang)}. One-click deploy on AWS, pre-verified and automatically tested.`,
+      // Social share card: first verified screenshot, else the app icon.
+      image: absUrl(
+        app.screenshots.length > 0 ? siteScreenshotUrl(app.screenshots[0].url) : app.icon
+      ),
       jsonLd: [
         {
           "@context": "https://schema.org",
@@ -138,7 +144,10 @@ function versionsRoutes(app: AppCurrent): PrerenderRoute[] {
     return {
       path,
       lang,
-      title: `${L(app.display_name, lang)} Versions - Verified Release History | ${BRAND}`,
+      title:
+        lang === "zh"
+          ? `${L(app.display_name, lang)} 版本历史 - 已验证发布记录 | ${BRAND}`
+          : `${L(app.display_name, lang)} Versions - Verified Release History | ${BRAND}`,
       description:
         lang === "zh"
           ? `${name} 全部已验证版本与发布历史。`

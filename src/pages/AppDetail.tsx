@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import { useI18n, pick } from "../i18n";
 import { useApp, useVersions, useStars, orderedScreenshots } from "../data/useAppData";
-import { VerifiedBadge, ReleaseBadge, useLocalePath, PlatformBadge, IconAvatar } from "../components/ui";
-import { formatDate, timeAgo } from "../lib/format";
-import { ONE_CLICK_TEMPLATE_URL } from "../lib/deploy";
+import { VerifiedBadge, ReleaseBadge, useLocalePath, PlatformBadge, IconAvatar, TimeAgo } from "../components/ui";
+import { formatDate } from "../lib/format";
+import { ONE_CLICK_TEMPLATE_URL, buildDeployUrl } from "../lib/deploy";
+import { DeployGuide, DeployQuickRef } from "../components/DeployGuide";
 import { useTitle } from "../lib/hooks";
 import { CATEGORIES } from "../data/categories";
 import { APP_FAQ } from "../data/faq";
@@ -13,6 +14,7 @@ import {
   CheckCircleIcon,
   DownloadIcon,
   ExternalLinkIcon,
+  RocketIcon,
 } from "../components/Icons";
 import type { AppVersionRecord } from "../data/types";
 
@@ -37,7 +39,9 @@ export function AppDetail() {
   const [deployMsg, setDeployMsg] = useState("");
   const [selectedInstanceType, setSelectedInstanceType] = useState("");
   const [selectedDiskGb, setSelectedDiskGb] = useState(30);
+  const [selectedRegion, setSelectedRegion] = useState("");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const stars = useStars(app?.app);
 
   useTitle(
     app
@@ -65,58 +69,17 @@ export function AppDetail() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [app]);
 
-  if (!app) {
-    return (
-      <section className="section">
-        <div className="container not-found">
-          <h1>{t("not_found")}</h1>
-        </div>
-      </section>
-    );
-  }
-
   // 初始化部署选项：verified 的实例档和磁盘大小作为默认值
   useEffect(() => {
     if (app && !selectedInstanceType) {
       setSelectedInstanceType(app.deploy.instance_type);
+      setSelectedRegion(app.deploy.regions[0] || "us-east-1");
     }
   }, [app, selectedInstanceType]);
 
-  const name = pick(locale, app.display_name);
-  const desc = pick(locale, app.description);
-  const recent = versions.slice(0, 4);
-  const shots = orderedScreenshots(app);
-  const stars = useStars(app.app);
-
-  // Deploy on AWS：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
-  // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
-  // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
-  const generateDeploy = () => {
-    const region = app.deploy.regions[0] || "us-east-1";
-    const verified =
-      versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
-    const digest = verified?.manifest.container.digest;
-    const image = digest
-      ? `${app.deploy.docker_image}@${digest}`
-      : app.deploy.docker_image || app.app;
-    const templateUrl = ONE_CLICK_TEMPLATE_URL;
-    const instanceType = selectedInstanceType || app.deploy.instance_type;
-    let url =
-      `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}` +
-      `#/stacks/create/review?stackName=corenova-${app.app}` +
-      `&templateURL=${encodeURIComponent(templateUrl)}` +
-      `&param_AppName=${encodeURIComponent(app.app)}` +
-      `&param_ImageReference=${encodeURIComponent(image)}` +
-      `&param_ContainerPort=${app.deploy.container_port}` +
-      `&param_InstanceType=${encodeURIComponent(instanceType)}` +
-      `&param_DiskGb=${selectedDiskGb}`;
-    const extra = app.deploy.extra_environment ?? [];
-    if (extra.length > 0) {
-      url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;
-    }
-    window.open(url, "_blank", "noopener");
-    return url;
-  };
+  // All hooks must run before any conditional return — `shots` is derived
+  // ahead of the `!app` guard so the lightbox effect can depend on it.
+  const shots = app ? orderedScreenshots(app) : [];
 
   useEffect(() => {
     if (!zoom) return;
@@ -136,6 +99,40 @@ export function AppDetail() {
     };
   }, [zoom, shots.length]);
 
+  if (!app) {
+    return (
+      <section className="section">
+        <div className="container not-found">
+          <h1>{t("not_found")}</h1>
+        </div>
+      </section>
+    );
+  }
+
+  const name = pick(locale, app.display_name);
+  const desc = pick(locale, app.description);
+  const recent = versions.slice(0, 4);
+
+  // Deploy on AWS：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
+  // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
+  // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
+  const generateDeploy = () => {
+    const verified =
+      versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
+    const url = buildDeployUrl({
+      app: app.app,
+      dockerImage: app.deploy.docker_image,
+      digest: verified?.manifest.container.digest,
+      containerPort: app.deploy.container_port,
+      region: selectedRegion || app.deploy.regions[0] || "us-east-1",
+      instanceType: selectedInstanceType || app.deploy.instance_type,
+      diskGb: selectedDiskGb,
+      extraEnvironment: app.deploy.extra_environment,
+    });
+    window.open(url, "_blank", "noopener");
+    return url;
+  };
+
   const scrollTo = (id: string) => {
     sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -143,7 +140,7 @@ export function AppDetail() {
   // Every row below is a Manifest field verbatim (deployment-contract §3 / §3.2).
   const infoRows: { label: string; value: ReactNode; mono?: boolean; highlight?: boolean }[] = [
     { label: t("latest_version"), value: app.app_version },
-    { label: t("verified"), value: timeAgo(app.verified_at, locale), highlight: true },
+    { label: t("verified"), value: <TimeAgo iso={app.verified_at} />, highlight: true },
     { label: "Docker Image", value: app.deploy.docker_image, mono: true },
     { label: t("supported_architectures"), value: app.architecture },
     { label: t("aws_regions"), value: app.deploy.regions.join(", ") },
@@ -300,6 +297,7 @@ export function AppDetail() {
                   ))}
                 </ul>
               )}
+              <DeployQuickRef app={app} />
           </div>
 
           {/* right sidebar */}
@@ -374,19 +372,23 @@ export function AppDetail() {
         >
           <div className="quick-deploy">
                 <h3 className="quick-deploy__title">
-                  {locale === "zh" ? "快速部署" : "Quick Deploy"}
+                  {t("quick_deploy")}
                 </h3>
                 <div className="quick-deploy__row">
                   <div className="quick-deploy__field">
                     <label>{t("aws_regions")}</label>
-                    <select className="select">
+                    <select
+                      className="select"
+                      value={selectedRegion}
+                      onChange={(e) => setSelectedRegion(e.target.value)}
+                    >
                       {app.deploy.regions.map((r) => (
-                        <option key={r}>{r}</option>
+                        <option key={r} value={r}>{r}</option>
                       ))}
                     </select>
                   </div>
                   <div className="quick-deploy__field">
-                    <label>{locale === "zh" ? "规格" : "Instance"}</label>
+                    <label>{t("instance_label")}</label>
                     <select
                       className="select"
                       value={selectedInstanceType}
@@ -400,7 +402,7 @@ export function AppDetail() {
                     </select>
                   </div>
                   <div className="quick-deploy__field">
-                    <label>{locale === "zh" ? "磁盘 (GB)" : "Disk (GB)"}</label>
+                    <label>{t("disk_gb_label")}</label>
                     <select
                       className="select"
                       value={selectedDiskGb}
@@ -411,26 +413,27 @@ export function AppDetail() {
                       ))}
                     </select>
                   </div>
-                  <div className="quick-deploy__field quick-deploy__btn">
-                    <button
-                      className="btn btn--primary"
-                      onClick={() => {
-                        generateDeploy();
-                        setDeployMsg(t("template_console_hint"));
-                      }}
-                    >
-                      <DownloadIcon size={16} /> {t("generate_template")}
-                    </button>
-                    <a
-                      className="btn btn--outline"
-                      href={ONE_CLICK_TEMPLATE_URL}
-                      download
-                    >
-                      <DownloadIcon size={16} /> {t("download_template")}
-                    </a>
-                  </div>
+                </div>
+                <div className="quick-deploy__btn">
+                  <button
+                    className="btn btn--primary"
+                    onClick={() => {
+                      generateDeploy();
+                      setDeployMsg(t("template_console_hint"));
+                    }}
+                  >
+                    <RocketIcon size={16} /> {t("generate_template")}
+                  </button>
+                  <a
+                    className="btn btn--outline"
+                    href={ONE_CLICK_TEMPLATE_URL}
+                    download
+                  >
+                    <DownloadIcon size={16} /> {t("download_template")}
+                  </a>
                 </div>
           </div>
+          <DeployGuide app={app} />
         </div>
 
         {/* versions */}
@@ -600,10 +603,10 @@ function VersionTable({
       <thead>
         <tr>
           <th>{t("versions")}</th>
-          <th>{locale === "zh" ? "发布日期" : "Release Date"}</th>
+          <th>{t("release_date")}</th>
           <th>{t("verified")}</th>
-          <th>{locale === "zh" ? "状态" : "Status"}</th>
-          <th>{locale === "zh" ? "AWS 测试" : "AWS Tested"}</th>
+          <th>{t("status")}</th>
+          <th>{t("aws_tested")}</th>
         </tr>
       </thead>
       <tbody>

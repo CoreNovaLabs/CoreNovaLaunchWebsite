@@ -9,3 +9,39 @@
 export const ONE_CLICK_TEMPLATE_URL: string =
   import.meta.env.VITE_ONE_CLICK_TEMPLATE_URL ??
   "https://corenovalaunch-templates.s3.us-east-1.amazonaws.com/corenova-one-click.template.yaml";
+
+export interface DeployOptions {
+  app: string;
+  dockerImage: string;
+  digest?: string;
+  containerPort: number;
+  region: string;
+  instanceType: string;
+  diskGb: number;
+  extraEnvironment?: string[];
+}
+
+// Stack name the deep link creates — also quoted in the post-deploy guide,
+// so users know which stack's Outputs tab to open. Keep both in one place.
+export const stackNameFor = (app: string): string => `corenova-${app}`;
+
+// CloudFormation console deep link for the one-click template. The image is
+// pinned to the verified digest (tag@digest) when one is available, so what
+// gets deployed is byte-identical to what was verified.
+export function buildDeployUrl(o: DeployOptions): string {
+  const image = o.digest ? `${o.dockerImage}@${o.digest}` : o.dockerImage || o.app;
+  let url =
+    `https://${o.region}.console.aws.amazon.com/cloudformation/home?region=${o.region}` +
+    `#/stacks/create/review?stackName=${stackNameFor(o.app)}` +
+    `&templateURL=${encodeURIComponent(ONE_CLICK_TEMPLATE_URL)}` +
+    `&param_AppName=${encodeURIComponent(o.app)}` +
+    `&param_ImageReference=${encodeURIComponent(image)}` +
+    `&param_ContainerPort=${o.containerPort}` +
+    `&param_InstanceType=${encodeURIComponent(o.instanceType)}` +
+    `&param_DiskGb=${o.diskGb}`;
+  const extra = o.extraEnvironment ?? [];
+  if (extra.length > 0) {
+    url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;
+  }
+  return url;
+}

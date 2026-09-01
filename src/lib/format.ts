@@ -1,9 +1,12 @@
 import type { Locale } from "../data/types";
 
-// Relative time, e.g. "2 hours ago" / "2 小时前". Computed against real now.
-export function timeAgo(iso: string, locale: Locale): string {
+// Relative time, e.g. "2 hours ago" / "2 小时前".
+// Accepts an optional `now` parameter for deterministic rendering (SSR / tests).
+// When `now` is omitted, uses Date.now() (client-only usage).
+export function timeAgo(iso: string, locale: Locale, now?: number): string {
   const then = new Date(iso).getTime();
-  const diff = Date.now() - then;
+  const current = now ?? Date.now();
+  const diff = current - then;
   const sec = Math.floor(diff / 1000);
   const min = Math.floor(sec / 60);
   const hr = Math.floor(min / 60);
@@ -17,9 +20,9 @@ export function timeAgo(iso: string, locale: Locale): string {
     return formatDate(iso, locale);
   }
   if (sec < 60) return "just now";
-  if (min < 60) return `${min} minutes ago`;
-  if (hr < 24) return `${hr} hours ago`;
-  if (day < 30) return `${day} days ago`;
+  if (min < 60) return min === 1 ? "1 minute ago" : `${min} minutes ago`;
+  if (hr < 24) return hr === 1 ? "1 hour ago" : `${hr} hours ago`;
+  if (day < 30) return day === 1 ? "1 day ago" : `${day} days ago`;
   return formatDate(iso, locale);
 }
 
