@@ -6,6 +6,7 @@
 // only the generic steps and must never invent admin paths or credential hints.
 import type { MouseEvent } from "react";
 import { useI18n, pick } from "../i18n";
+import { useLocalePath } from "./ui";
 import { stackNameFor } from "../lib/deploy";
 import type { AppCurrent } from "../data/types";
 
@@ -58,6 +59,7 @@ export function DeployQuickRef({ app }: { app: AppCurrent }) {
 // The full numbered guide, rendered under the Quick Deploy card.
 export function DeployGuide({ app }: { app: AppCurrent }) {
   const { locale, t } = useI18n();
+  const l = useLocalePath();
   const pd = app.deploy.post_deploy;
   return (
     <div className="deploy-guide">
@@ -96,6 +98,27 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
           </ul>
         </div>
       )}
+      <div className="deploy-guide__next">
+        <h4>{t("deploy_guide_next_title")}</h4>
+        <ul>
+          {app.deploy.data_path && (
+            <li>{t("deploy_guide_next_data", { path: app.deploy.data_path })}</li>
+          )}
+          <li>
+            {t("deploy_guide_next_backup_prefix")}{" "}
+            <a href={l("/docs/upgrading-and-backups/")} className="link-blue">
+              {t("deploy_guide_next_backup_link")}
+            </a>
+          </li>
+          <li>
+            {t("deploy_guide_next_upgrade_prefix")}{" "}
+            <a href={l(`/apps/${app.app}/versions/`)} className="link-blue">
+              {t("deploy_guide_next_upgrade_link")}
+            </a>
+          </li>
+        </ul>
+        <p className="deploy-guide__warning">{t("deploy_guide_delete_warning")}</p>
+      </div>
     </div>
   );
 }

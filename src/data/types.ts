@@ -105,6 +105,7 @@ export interface Deploy {
   extra_environment?: string[];
   post_deploy?: PostDeploy;
   cost_estimate?: CostEstimate;
+  data_path?: string;
 }
 
 export interface ReleaseInfo {
