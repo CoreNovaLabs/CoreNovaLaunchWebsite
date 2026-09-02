@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T06:49:14Z",
+  "generated_at": "2026-09-02T08:28:28Z",
   "backend": "r2",
   "index": {
     "schema_version": "1.0",
@@ -999,13 +999,13 @@
   },
   "stats": {
     "schema_version": "1.0",
-    "generated_at": "2026-09-02T06:49:14Z",
+    "generated_at": "2026-09-02T08:28:28Z",
     "verified_app_count": 2,
     "verified_version_count": 2,
     "success_rate": null,
     "github_stars": {
-      "ghost": 55098,
-      "uptime-kuma": 90867
+      "ghost": 55099,
+      "uptime-kuma": 90869
     },
     "degraded": [
       "success_rate"

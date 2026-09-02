@@ -8,7 +8,14 @@ import { dicts } from "./i18n";
 
 // Build-time SEO metadata for prerendered routes (docs/website-design.md §4).
 // Consumed by scripts/prerender.mjs via src/entry-server.tsx.
-export const SITE_ORIGIN = "https://corenova-website.pages.dev";
+//
+// Canonical origin for canonical/og:url/sitemap/JSON-LD. Defaults to the
+// production custom domain so the pages.dev mirror serves canonical URLs
+// pointing at the primary domain (no duplicate-content indexing). Preview
+// deployments can override with VITE_SITE_ORIGIN to match their serving host.
+export const SITE_ORIGIN: string =
+  (import.meta.env.VITE_SITE_ORIGIN as string | undefined) ??
+  "https://launch.corenovacloud.com";
 
 const BRAND = "CoreNova Launch";
 const LOCALES: Locale[] = ["en", "zh"];
