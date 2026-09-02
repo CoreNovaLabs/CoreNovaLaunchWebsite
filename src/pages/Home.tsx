@@ -106,14 +106,9 @@ export function Home() {
               <button className="btn btn--primary" onClick={() => navigate(l("/apps"))}>
                 {t("browse_software")}
               </button>
-              <a
-                className="btn btn--ghost"
-                href="https://github.com/CoreNovaLabs/CoreNovaLaunch"
-                target="_blank"
-                rel="noreferrer"
-              >
+              <button className="btn btn--ghost" onClick={() => navigate(l("/docs"))}>
                 {t("view_documentation")}
-              </a>
+              </button>
             </div>
           </div>
           <div className="hero__right">
