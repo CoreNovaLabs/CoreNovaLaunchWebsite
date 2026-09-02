@@ -127,6 +127,18 @@ export function Versions() {
                         >
                           {t("details")}
                         </button>
+                        {/* This row's own verification report, verbatim from the
+                            Manifest; older records without one render no link. */}
+                        {m.artifacts.report_url && (
+                          <a
+                            className="btn btn--ghost btn--sm"
+                            href={m.artifacts.report_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {t("view_report")}
+                          </a>
+                        )}
                       </div>
                     </td>
                   </tr>

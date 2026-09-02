@@ -2,7 +2,7 @@ import type { AppCurrent, Locale, Localized } from "./data/types";
 import { APPS_BY_INDEX, siteScreenshotUrl } from "./data/generated";
 import { CATEGORIES } from "./data/categories";
 import { SOLUTIONS } from "./data/solutions";
-import { DOCS } from "./content/docs";
+import { DOCS, docVariant } from "./content/docs";
 import { APP_FAQ } from "./data/faq";
 import { dicts } from "./i18n";
 
@@ -224,17 +224,18 @@ function docsRoutes(): PrerenderRoute[] {
   );
   const details = DOCS.flatMap((d) =>
     LOCALES.map((lang) => {
+      const v = docVariant(d, lang);
       const path = routePath(lang, `/docs/${d.slug}/`);
       return {
         path,
         lang,
-        title: `${d.title} | ${BRAND}`,
-        description: d.excerpt,
+        title: `${v.title} | ${BRAND}`,
+        description: v.excerpt,
         jsonLd: [
           breadcrumb([
             { name: t(lang, "home"), path: routePath(lang) },
             { name: t(lang, "docs_title"), path: routePath(lang, "/docs/") },
-            { name: d.title, path },
+            { name: v.title, path },
           ]),
         ],
       };

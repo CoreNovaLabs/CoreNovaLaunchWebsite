@@ -14,6 +14,7 @@ import {
   CheckCircleIcon,
   DownloadIcon,
   ExternalLinkIcon,
+  LockIcon,
   RocketIcon,
 } from "../components/Icons";
 import type { AppVersionRecord } from "../data/types";
@@ -138,6 +139,8 @@ export function AppDetail() {
   };
 
   // Every row below is a Manifest field verbatim (deployment-contract §3 / §3.2).
+  // The cost row only appears when cost_estimate was registered (rule 18) — the
+  // number is a fact, never computed from instance type / disk size.
   const infoRows: { label: string; value: ReactNode; mono?: boolean; highlight?: boolean }[] = [
     { label: t("latest_version"), value: app.app_version },
     { label: t("verified"), value: <TimeAgo iso={app.verified_at} />, highlight: true },
@@ -145,6 +148,15 @@ export function AppDetail() {
     { label: t("supported_architectures"), value: app.architecture },
     { label: t("aws_regions"), value: app.deploy.regions.join(", ") },
     { label: "Instance", value: app.deploy.instance_type },
+    ...(app.deploy.cost_estimate
+      ? [
+          {
+            label: t("est_cost"),
+            value: t("est_cost_value", { usd: app.deploy.cost_estimate.monthly_usd }),
+            highlight: true,
+          },
+        ]
+      : []),
     {
       label: t("stars"),
       value: stars != null ? stars.toLocaleString() : "—",
@@ -371,9 +383,16 @@ export function AppDetail() {
           ref={(el) => (sectionRefs.current["deployment"] = el)}
         >
           <div className="quick-deploy">
-                <h3 className="quick-deploy__title">
-                  {t("quick_deploy")}
-                </h3>
+                <div className="quick-deploy__title-row">
+                  <h3 className="quick-deploy__title">
+                    {t("quick_deploy")}
+                  </h3>
+                  {/* deploy URL pins the verified digest (buildDeployUrl) — say so
+                      where the user clicks, not only in the guide below */}
+                  <span className="chip">
+                    <LockIcon size={12} /> {t("digest_pin_chip")}
+                  </span>
+                </div>
                 <div className="quick-deploy__row">
                   <div className="quick-deploy__field">
                     <label>{t("aws_regions")}</label>
@@ -432,6 +451,13 @@ export function AppDetail() {
                     <DownloadIcon size={16} /> {t("download_template")}
                   </a>
                 </div>
+                {app.deploy.cost_estimate && (
+                  <p className="quick-deploy__cost">
+                    <strong>{t("est_cost_value", { usd: app.deploy.cost_estimate.monthly_usd })}</strong>
+                    {app.deploy.cost_estimate.note &&
+                      ` — ${pick(locale, app.deploy.cost_estimate.note)}`}
+                  </p>
+                )}
           </div>
           <DeployGuide app={app} />
         </div>

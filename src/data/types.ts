@@ -87,6 +87,14 @@ export interface PostDeploy {
   notes?: Localized[];
 }
 
+// Monthly AWS cost estimate (app-schema rule 18): a human-verified fact registered in
+// apps/*.yaml, NOT computed by the frontend from instance type / disk size (§6
+// anti-pattern). Absent for records published before the contract existed.
+export interface CostEstimate {
+  monthly_usd: number;
+  note?: Localized;
+}
+
 export interface Deploy {
   launch_url: string;
   documentation_url: string;
@@ -96,6 +104,7 @@ export interface Deploy {
   docker_image: string;
   extra_environment?: string[];
   post_deploy?: PostDeploy;
+  cost_estimate?: CostEstimate;
 }
 
 export interface ReleaseInfo {

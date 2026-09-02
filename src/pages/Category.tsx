@@ -3,6 +3,7 @@ import { useI18n, pick } from "../i18n";
 import { useApps } from "../data/useAppData";
 import { getCategory } from "../data/categories";
 import { AppCard } from "../components/ui";
+import { REQUEST_APP_URL } from "../lib/links";
 import { useTitle } from "../lib/hooks";
 
 export function Category() {
@@ -37,6 +38,16 @@ export function Category() {
         {apps.length === 0 ? (
           <div className="empty">
             <p>{t("no_results")}</p>
+            {/* An empty category is a demand signal, not a dead end — route it
+                to the request-an-app issue form. */}
+            <a
+              className="btn btn--ghost btn--sm"
+              href={REQUEST_APP_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("request_app")}
+            </a>
           </div>
         ) : (
           <div className="grid">

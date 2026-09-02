@@ -113,6 +113,13 @@ const en: Dict = {
     "Opening AWS CloudFormation with the official one-click template (VPC + host). The image is pinned to this version's verified digest, resources are created in your own account, and first boot takes about 5–10 minutes.",
   download_template: "Download template (YAML)",
   actions_run: "Actions run",
+  // cost card (facts come verbatim from deploy.cost_estimate — rule 18; the
+  // frontend never prices instance types itself)
+  est_cost: "Est. AWS cost",
+  est_cost_value: "≈ $%{usd}/mo",
+  digest_pin_chip: "Image pinned by verified digest",
+  // request-an-app entry (GitHub issue form on the verify repo)
+  request_app: "Request an app",
   // deploy guide (standardized post-deployment instructions; per-app copy comes from
   // deploy.post_deploy — deployment-contract §3.2, never invented by the frontend)
   deploy_guide_title: "After you deploy",
@@ -274,6 +281,12 @@ const zh: Dict = {
     "正在用官方 one-click 模板（VPC + 主机）打开 CloudFormation 创建向导，镜像已按本验证版本的 digest 钉住。资源创建在你自己的账号中，会产生 AWS 费用；首次装机约 5–10 分钟。",
   download_template: "下载模板（YAML）",
   actions_run: "Actions 运行",
+  // 成本卡（数字与口径均来自 deploy.cost_estimate 注册数据——规则18；前端绝不按规格自行算价）
+  est_cost: "估算成本",
+  est_cost_value: "≈ $%{usd}/月",
+  digest_pin_chip: "镜像按已验证 digest 钉住",
+  // 申请上架入口（Verify 仓的 GitHub issue 表单）
+  request_app: "申请上架",
   // 部署后指引（标准化文案；各应用差异部分来自 deploy.post_deploy，前端不得自造）
   deploy_guide_title: "部署完成后",
   deploy_guide_step1:

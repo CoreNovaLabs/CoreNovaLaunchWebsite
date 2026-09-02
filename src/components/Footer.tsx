@@ -1,6 +1,7 @@
 import { useI18n } from "../i18n";
 import { AppLink } from "./ui";
 import { RocketIcon } from "./Icons";
+import { REQUEST_APP_URL } from "../lib/links";
 
 export function Footer() {
   const { t } = useI18n();
@@ -31,6 +32,9 @@ export function Footer() {
             rel="noreferrer"
           >
             GitHub
+          </a>
+          <a href={REQUEST_APP_URL} target="_blank" rel="noreferrer">
+            {t("request_app")}
           </a>
         </div>
         <div className="footer__col">

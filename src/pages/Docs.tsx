@@ -5,7 +5,7 @@ import { useI18n } from "../i18n";
 import { useLocalePath } from "../components/ui";
 import { useTitle } from "../lib/hooks";
 import { ArrowRightIcon } from "../components/Icons";
-import { DOCS } from "../content/docs";
+import { DOCS, docVariant } from "../content/docs";
 
 export function DocsIndex() {
   const { locale, t } = useI18n();
@@ -19,15 +19,18 @@ export function DocsIndex() {
         <h1 className="page-title">{t("docs_title")}</h1>
         <p className="page-subtitle">{t("docs_subtitle")}</p>
         <div className="doc-list">
-          {DOCS.map((d) => (
-            <Link key={d.slug} to={l(`/docs/${d.slug}`)} className="doc-card">
-              <h3>{d.title}</h3>
-              <p>{d.excerpt}</p>
-              <span className="section__link">
-                {t("docs_read")} <ArrowRightIcon size={14} />
-              </span>
-            </Link>
-          ))}
+          {DOCS.map((d) => {
+            const v = docVariant(d, locale);
+            return (
+              <Link key={d.slug} to={l(`/docs/${d.slug}`)} className="doc-card">
+                <h3>{v.title}</h3>
+                <p>{v.excerpt}</p>
+                <span className="section__link">
+                  {t("docs_read")} <ArrowRightIcon size={14} />
+                </span>
+              </Link>
+            );
+          })}
           {DOCS.length === 0 && <p className="page-subtitle">{t("docs_empty")}</p>}
         </div>
       </div>
@@ -40,16 +43,19 @@ export function DocDetail() {
   const { locale, t } = useI18n();
   const l = useLocalePath();
   const doc = DOCS.find((d) => d.slug === slug);
+  // zh readers get the zh variant when one exists; otherwise the English base
+  // (docs are written English-first).
+  const v = doc ? docVariant(doc, locale) : null;
 
   useTitle(
-    doc
-      ? `${doc.title} | CoreNova Launch`
+    v
+      ? `${v.title} | CoreNova Launch`
       : locale === "zh"
         ? "文档未找到 | CoreNova Launch"
         : "Doc not found | CoreNova Launch"
   );
 
-  if (!doc) {
+  if (!doc || !v) {
     return (
       <section className="section">
         <div className="container not-found">
@@ -69,10 +75,10 @@ export function DocDetail() {
           <span>›</span>
           <Link to={l("/docs")}>{t("docs_title")}</Link>
           <span>›</span>
-          <span>{doc.title}</span>
+          <span>{v.title}</span>
         </nav>
         <article className="markdown doc-article">
-          <Markdown remarkPlugins={[remarkGfm]}>{doc.raw}</Markdown>
+          <Markdown remarkPlugins={[remarkGfm]}>{v.raw}</Markdown>
         </article>
       </div>
     </section>

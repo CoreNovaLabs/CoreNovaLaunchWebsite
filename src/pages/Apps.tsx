@@ -5,6 +5,7 @@ import { useApps } from "../data/useAppData";
 import { starsOf } from "../data/generated";
 import { CATEGORIES } from "../data/categories";
 import { AppCard } from "../components/ui";
+import { REQUEST_APP_URL } from "../lib/links";
 import { useTitle } from "../lib/hooks";
 import type { AppCurrent } from "../data/types";
 
@@ -148,6 +149,14 @@ export function Apps() {
             <button className="btn btn--ghost btn--sm" onClick={clearFilters}>
               {t("clear_filters")}
             </button>
+            <a
+              className="btn btn--ghost btn--sm"
+              href={REQUEST_APP_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("request_app")}
+            </a>
           </div>
         ) : (
           <div className="grid">

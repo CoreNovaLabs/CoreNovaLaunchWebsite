@@ -962,6 +962,9 @@ button {
   padding: var(--space-24) 0;
   color: var(--text-sub);
 }
+.empty .btn {
+  margin: var(--space-3) var(--space-2) 0;
+}
 
 /* ----------------------------- breadcrumb ------------------------------- */
 .breadcrumb {
@@ -1465,6 +1468,44 @@ button {
 }
 .quick-deploy__btn .btn {
   white-space: nowrap;
+}
+.quick-deploy__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin: 0 0 var(--space-6);
+}
+.quick-deploy__title-row .quick-deploy__title {
+  margin: 0;
+}
+.quick-deploy__cost {
+  margin: var(--space-4) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+.quick-deploy__cost strong {
+  color: var(--text);
+}
+
+/* small inline pill (digest pin chip next to section titles) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-sub);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-weak);
+  white-space: nowrap;
+}
+.chip svg {
+  color: var(--success);
+  flex-shrink: 0;
 }
 
 .side-panel__title {
