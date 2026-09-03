@@ -99,6 +99,7 @@ export function Versions() {
                         {/* Deep link pinned to THIS row's verified digest (§3.2). */}
                         <button
                           className="btn btn--primary btn--sm"
+                          title={t("deploy_new_stack_hint")}
                           onClick={() => {
                             const d = rec.current.deploy;
                             window.open(

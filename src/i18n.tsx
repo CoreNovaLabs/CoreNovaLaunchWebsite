@@ -141,6 +141,8 @@ const en: Dict = {
   deploy_guide_next_upgrade_link: "Version history",
   deploy_guide_delete_warning:
     "Deleting the CloudFormation stack permanently destroys the data volume. There is no soft-delete. Back up first.",
+  deploy_new_stack_hint:
+    "This creates a new CloudFormation stack. Your current deployment is not affected.",
   dg_out_launch_url: "Access URL — open this in your browser",
   dg_out_public_ip: "The instance's public IP",
   dg_out_public_dns: "The instance's public DNS name",
@@ -315,6 +317,7 @@ const zh: Dict = {
   deploy_guide_next_upgrade_prefix: "升级到更新的已验证版本：",
   deploy_guide_next_upgrade_link: "版本历史",
   deploy_guide_delete_warning: "删除 CloudFormation 栈会永久销毁数据卷，不可恢复。请先备份。",
+  deploy_new_stack_hint: "这会创建一个新的 CloudFormation 栈，不影响当前部署。",
   dg_out_launch_url: "访问地址——在浏览器打开它",
   dg_out_public_ip: "实例公网 IP",
   dg_out_public_dns: "实例公网 DNS 名称",
