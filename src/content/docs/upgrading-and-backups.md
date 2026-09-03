@@ -15,8 +15,11 @@ into the container at a fixed path. The stack's Outputs tab shows the
 Two consequences worth internalizing:
 
 - **Stopping the instance keeps the data.** Start it again and the app resumes.
-- **Deleting the stack deletes the data.** CloudFormation delete removes the
-  instance *and* its data volume. There is no soft-delete.
+- **Deleting the stack keeps the data volume.** The data volume uses
+  `DeleteOnTermination: false`, so when CloudFormation terminates the instance
+  the volume survives in your EC2 account. You can find it under
+  EC2 → Volumes (look for the `corenova-data` label). Snapshot it before you
+  delete it — there is no soft-delete once the volume itself is removed.
 
 ## Backing up
 
@@ -34,6 +37,23 @@ Two complementary options:
 
 For anything you care about, do both: snapshots are cheap insurance, app
 exports are the ones you can actually move elsewhere.
+
+### Automated backups (AWS Backup)
+
+Manual snapshots work, but forgetting to take one is the real risk. AWS Backup
+lets you schedule automatic snapshots of the data volume:
+
+1. Open the [AWS Backup console](https://console.aws.amazon.com/backup/).
+2. Create a backup plan (e.g. "daily-30d-retention").
+3. Assign the plan to the data volume by tag: in the EC2 console, tag the
+   volume with `corenova:app: <app-name>`, then add a resource assignment
+   matching that tag.
+4. AWS Backup will snapshot the volume daily with 30-day retention. No further
+   action needed.
+
+Restoring from a backup: create a new volume from the snapshot in the EC2
+console, attach it to a new instance as `/dev/sdf`, and the app will pick up
+where it left off.
 
 ## Upgrading to a new verified version
 
