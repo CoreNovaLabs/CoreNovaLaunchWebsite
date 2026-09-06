@@ -12,8 +12,10 @@
 // Fixed order (§ never "best of both"):
 //   1. verified/index.json          → app list (R2 has no ListObjects; guessing is forbidden)
 //   2. verified/{app}/current.json  → missing file for an indexed app = HARD FAILURE
-//   3. verified/{app}/versions/*.json (key names come from current.json.app_version + index history)
-//   4. upstream GitHub release notes → data/{app}/releases.json (see the exception note below)
+//   3. verified/{app}/versions/index.json → per-app published versions (§2.2); legacy data
+//      without it falls back to walking the release.previous_version chain
+//   4. upstream GitHub release notes → data/{app}/releases.json (see the exception note below);
+//      only notes matching a verified version are inlined into generated.json (bundle bound)
 //   5. data/stats.json              → derived statistics, NOT part of current.json
 //   6. screenshots                  → mirrored to public/screenshots/<key path>; any miss = HARD FAILURE
 //
@@ -88,6 +90,11 @@ if (backend === "r2" && !R2_BASE) {
 const GITHUB_API = "https://api.github.com";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "";
 const RELEASES_PER_APP = Number(process.env.RELEASES_PER_APP || 30);
+// Bundle bounds (docs/website-design.md §5.1): the inline payload grows with app count,
+// so both per-app inputs are capped. Release-note bodies are truncated and only notes
+// matching a verified version are kept — the raw upstream list stays in data/{app}/releases.json.
+const NOTES_CHAR_LIMIT = Number(process.env.NOTES_CHAR_LIMIT || 6000);
+const VERSIONS_PER_APP = Number(process.env.VERSIONS_PER_APP || 10);
 const SUCCESS_WINDOW_DAYS = 30;
 
 // ------------------------------------------------------------------ helpers
@@ -269,33 +276,39 @@ for (const entry of index.apps) {
 // ------------------------------------------------------------------ 2. currents
 
 const currents = new Map(); // app -> current.json
-for (const entry of index.apps) {
-  const current = await fetchJsonKey(`verified/${entry.app}/current.json`);
-  if (!current) {
-    // §2.1: listed but absent => hard failure, otherwise apps silently disappear from the site.
-    fail(`verified/index.json lists "${entry.app}" but verified/${entry.app}/current.json is missing — refusing to skip it`);
-  }
-  validateCurrent(entry.app, current);
-  if (entry.verification_id && current.verification_id !== entry.verification_id) {
-    fail(
-      `verified/index.json says ${entry.app} is at verification_id "${entry.verification_id}" but current.json has "${current.verification_id}" — index and current are out of sync (§2.1)`
-    );
-  }
-  if (entry.app_version && current.app_version !== entry.app_version) {
-    fail(
-      `verified/index.json says ${entry.app} is at "${entry.app_version}" but current.json has "${current.app_version}" (§2.1)`
-    );
-  }
-  currents.set(entry.app, current);
+// 各阶段按 app 并发拉取（r2 后端下串行 RTT 是主要耗时），但结果一律按 index.apps 的
+// 顺序回填，generated.json 的 apps 顺序因此与后端无关、逐次构建稳定。
+{
+  const loaded = await Promise.all(index.apps.map(async (entry) => {
+    const current = await fetchJsonKey(`verified/${entry.app}/current.json`);
+    if (!current) {
+      // §2.1: listed but absent => hard failure, otherwise apps silently disappear from the site.
+      fail(`verified/index.json lists "${entry.app}" but verified/${entry.app}/current.json is missing — refusing to skip it`);
+    }
+    validateCurrent(entry.app, current);
+    if (entry.verification_id && current.verification_id !== entry.verification_id) {
+      fail(
+        `verified/index.json says ${entry.app} is at verification_id "${entry.verification_id}" but current.json has "${current.verification_id}" — index and current are out of sync (§2.1)`
+      );
+    }
+    if (entry.app_version && current.app_version !== entry.app_version) {
+      fail(
+        `verified/index.json says ${entry.app} is at "${entry.app_version}" but current.json has "${current.app_version}" (§2.1)`
+      );
+    }
+    return [entry.app, current];
+  }));
+  for (const [app, current] of loaded) currents.set(app, current);
 }
 console.log(`[fetch-verified] currents ok: ${[...currents.keys()].join(", ")}`);
 
 // ------------------------------------------------------------------ 3. versions
-
-// Version files are keyed by app_version, and R2/dir expose no listing. We therefore
-// discover keys from data we are allowed to read: the current version plus every
-// `release.previous_version` chain carried by already-fetched records. Unknown extra
-// historical keys simply stay off the site until Repo C ships a version index.
+//
+// Discovery prefers the per-app versions/index.json (deployment-contract §2.2): the
+// authoritative list of versions that passed the P5 commit gate, written by Repo C at
+// publish time and immune to previous_version chain breakage (e.g. a self-referencing
+// pointer). Data published before the index existed falls back to chain-walking; unknown
+// extra historical keys simply stay off the site until the next publish writes the index.
 const historyCache = new Map(); // `${app}/${app_version}` -> manifest | null
 async function loadManifest(app, appVersion) {
   const cacheKey = `${app}/${appVersion}`;
@@ -309,32 +322,57 @@ async function loadManifest(app, appVersion) {
 const finalByApp = new Map(); // app -> manifest[] (nine checks all true, deduped, newest first)
 
 async function collectVersions(app, current) {
-  const seen = new Set();
   const out = [];
-  const queue = [current.app_version];
-  while (queue.length) {
-    const v = queue.shift();
-    if (!v || seen.has(v)) continue;
+  const seen = new Set();
+  const load = async (v) => {
+    if (!v || seen.has(v)) return;
     seen.add(v);
     const m = await loadManifest(app, v);
-    if (!m) continue; // history shorter than the previous_version pointer claims
+    // A listed version whose record is absent or not final-state is skipped loudly:
+    // the index is a claim by Repo C, and silently trusting a broken claim is worse.
+    if (!m) {
+      console.warn(`[fetch-verified] ${app}: listed version ${v} has no readable manifest — skipping`);
+      return;
+    }
     if (allNineTrue(m)) out.push(m);
-    const prev = m.website?.release?.previous_version || m.release?.previous_version;
-    if (prev) queue.push(prev);
+  };
+
+  const vIndex = await fetchJsonKey(`verified/${app}/versions/index.json`);
+  const listed = Array.isArray(vIndex?.versions) ? vIndex.versions : [];
+  if (listed.length > 0) {
+    for (const e of listed) await load(e?.app_version);
+  } else {
+    // Legacy discovery: current version + previous_version chain. Breaks on a broken
+    // pointer; the versions index above is the durable fix.
+    const queue = [current.app_version];
+    while (queue.length) {
+      const v = queue.shift();
+      if (!v || seen.has(v)) continue;
+      seen.add(v);
+      const m = await loadManifest(app, v);
+      if (!m) continue; // history shorter than the previous_version pointer claims
+      if (allNineTrue(m)) out.push(m);
+      const prev = m.website?.release?.previous_version || m.release?.previous_version;
+      if (prev && !seen.has(prev)) queue.push(prev);
+    }
   }
   out.sort((a, b) => String(b.verified_at).localeCompare(String(a.verified_at)));
   return out;
 }
 
-for (const [app, current] of currents) {
-  const list = await collectVersions(app, current);
-  if (!list.some((m) => m.app_version === current.app_version)) {
-    // verification-manifest §6.3 P4 precedes the §P5 commit point, so this record must exist.
-    fail(
-      `verified/${app}/versions/${current.app_version}.json is missing or not a final-state record (nine checks all true) although current.json exists — refusing to publish an app with an empty version page`
-    );
-  }
-  finalByApp.set(app, list);
+{
+  const lists = await Promise.all([...currents.entries()].map(async ([app, current]) => {
+    const list = await collectVersions(app, current);
+    if (!list.some((m) => m.app_version === current.app_version)) {
+      // verification-manifest §6.3 P4 precedes the §P5 commit point, so this record must exist.
+      fail(
+        `verified/${app}/versions/${current.app_version}.json is missing or not a final-state record (nine checks all true) although current.json exists — refusing to publish an app with an empty version page`
+      );
+    }
+    // Bound the inline payload: keep only the VERSIONS_PER_APP most recent records per app.
+    return [app, list.slice(0, VERSIONS_PER_APP)];
+  }));
+  for (const [app, list] of lists) finalByApp.set(app, list);
 }
 
 // ------------------------------------------------------------------ write data/
@@ -357,11 +395,22 @@ for (const [app, current] of currents) {
 //
 // UPSTREAM METADATA SYNC EXCEPTION (deployment-contract §1):
 // `current.json` deliberately carries no `source.repo`, and inventing one on the frontend
-// would create a second source of truth. So the owner/repo used ONLY to fetch GitHub release
-// notes is read from Repo C's apps/{app}.yaml. That file is upstream *catalogue* metadata
-// (like documentation_url), never verification evidence: it is not copied into data/verified/**,
-// not rendered as a verification fact, and a failure to read it degrades the page instead of
-// failing the build.
+// would create a second source of truth. The owner/repo used ONLY to fetch GitHub release
+// notes therefore comes from the verified manifests already fetched above: every
+// versions/*.json record carries `release.source_repo` (verification-manifest §3), which is
+// verification data from the same backend — so this works in CI without Repo C's workspace.
+// Reading Repo C's local apps/*.yaml remains a local-dev fallback only (§1 forbids reading
+// Repo C's workspace as a source): it is upstream *catalogue* metadata, never verification
+// evidence, not rendered as a verification fact, and a failure to read it degrades the page
+// instead of failing the build.
+
+function sourceRepoFromManifest(app) {
+  const list = finalByApp.get(app) ?? [];
+  const current = currents.get(app);
+  const m = list.find((x) => x.app_version === current?.app_version) ?? list[0];
+  const repo = m?.release?.source_repo;
+  return repo && /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo) ? repo : null;
+}
 
 const REPO_C_APPS_DIR = path.resolve(
   process.env.REPO_C_APPS_DIR || path.join(WEBSITE_ROOT, "..", "CoreNovaLaunchVerify", "apps")
@@ -376,6 +425,21 @@ function sourceRepoFromAppSpec(app) {
   const m = (block ?? "").match(/^\s*repo:\s*["']?([^"'\s#]+)/m);
   const repo = m?.[1];
   return repo && /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo) ? repo : null;
+}
+
+// Inline payload filter: the site renders release notes ONLY for versions that have a
+// verified manifest (releaseNotesFor matches by identical tag), so unmatched upstream
+// releases are dead bundle weight. data/{app}/releases.json keeps the raw list for
+// debugging; bodies are truncated to NOTES_CHAR_LIMIT.
+function inlineReleasesFor(app, releases) {
+  const manifestTags = new Set((finalByApp.get(app) ?? []).map((m) => String(m.app_version)));
+  const looseTags = new Set([...manifestTags].map((t) => t.replace(/^v/i, "")));
+  return releases
+    .filter((r) =>
+      manifestTags.has(r.tag_name) ||
+      looseTags.has(String(r.tag_name ?? "").replace(/^v/i, ""))
+    )
+    .map((r) => ({ ...r, body: (r.body ?? "").slice(0, NOTES_CHAR_LIMIT) }));
 }
 
 async function githubJson(url) {
@@ -396,18 +460,21 @@ async function githubJson(url) {
 
 const degraded = new Set();
 const starsByApp = {};
-const releasesByApp = {};
+const releasesByApp = {}; // full raw list per app → data/{app}/releases.json
+const inlineReleases = {}; // verified-version-matched, truncated → generated.json
 
-for (const [app, current] of currents) {
-  const repo = sourceRepoFromAppSpec(app);
+// 每个 app 两次带重试的 GitHub 调用是 r2/CI 路径上最慢的一段，按 app 并发；
+// 各任务只写自己的键与自己的 data/{app}/releases.json，降级语义与串行版一致。
+await Promise.all([...currents.keys()].map(async (app) => {
+  const repo = sourceRepoFromManifest(app) ?? sourceRepoFromAppSpec(app);
   if (!repo) {
-    console.warn(`[fetch-verified] no source.repo for ${app} — skipping upstream metadata sync`);
+    console.warn(`[fetch-verified] no release.source_repo for ${app} — skipping upstream metadata sync`);
     degraded.add(`releases:${app}`);
     degraded.add("github_stars");
     releasesByApp[app] = [];
     starsByApp[app] = null;
     await dumpJson(path.join(DATA_DIR, app, "releases.json"), []);
-    continue;
+    return;
   }
   // release notes
   let releases = [];
@@ -433,6 +500,7 @@ for (const [app, current] of currents) {
   }
   releasesByApp[app] = releases;
   await dumpJson(path.join(DATA_DIR, app, "releases.json"), releases);
+  inlineReleases[app] = inlineReleasesFor(app, releases);
 
   // stars
   try {
@@ -448,7 +516,7 @@ for (const [app, current] of currents) {
     starsByApp[app] = null;
     degraded.add("github_stars");
   }
-}
+}));
 
 // ------------------------------------------------------------------ 5. stats.json (§5.1)
 
@@ -503,9 +571,10 @@ await dumpJson(path.join(DATA_DIR, "stats.json"), stats);
 
 // ------------------------------------------------------------------ 6. screenshot mirror (§2.3)
 
-const mirroredShots = []; // relative site paths actually present on disk
-for (const [app, current] of currents) {
-  for (const s of current.screenshots) {
+const mirroredShots = await Promise.all(
+  [...currents.entries()].flatMap(([app, current]) =>
+    current.screenshots.map((s) => ({ app, s }))
+  ).map(async ({ app, s }) => {
     const key = screenshotRelativePath(s.url);
     const dest = path.join(PUBLIC_DIR, key);
     const bytes = await fetchKey(key);
@@ -518,9 +587,9 @@ for (const [app, current] of currents) {
     if (bytes.byteLength === 0) fail(`screenshot "${key}" is empty in the ${backend} backend`);
     await fsp.mkdir(path.dirname(dest), { recursive: true });
     await fsp.writeFile(dest, bytes);
-    mirroredShots.push({ app, scenario: s.scenario, sitePath: "/" + key, bytes: bytes.byteLength });
-  }
-}
+    return { app, scenario: s.scenario, sitePath: "/" + key, bytes: bytes.byteLength };
+  })
+);
 console.log(`[fetch-verified] mirrored ${mirroredShots.length} screenshot(s)`);
 
 // ------------------------------------------------------------------ 7. inline for SSR + CSR
@@ -536,7 +605,7 @@ const generated = {
   versions: Object.fromEntries(
     [...finalByApp.entries()].map(([app, list]) => [app, list])
   ),
-  releases: releasesByApp,
+  releases: inlineReleases,
   stats,
   screenshots: mirroredShots.map((s) => s.sitePath),
 };

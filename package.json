@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "description": "CoreNova Launch official website (Repo A) - Vite + React, renders build-time verified data from Repo C (dir fixtures) or Cloudflare R2",
   "scripts": {
     "predev": "node scripts/fetch-verified.mjs --allow-stale",

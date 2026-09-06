@@ -40,7 +40,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # 与 pr-checks.yml 同一版本:PR 门禁与实际部署必须用同一个 Node,
+          # 否则会出现「PR 全绿、部署才炸」。Node 20 已于 2026-04 EOL。
+          node-version: 22
           cache: npm
 
       - name: Install deps
