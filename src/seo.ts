@@ -123,7 +123,6 @@ function appDetailRoutes(app: AppCurrent): PrerenderRoute[] {
           url: absUrl(path),
           image: absUrl(app.icon),
           screenshot: app.screenshots.map((s) => absUrl(siteScreenshotUrl(s.url))),
-          installUrl: app.deploy.launch_url,
         },
         breadcrumb([
           { name: t(lang, "home"), path: routePath(lang) },

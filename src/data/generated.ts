@@ -3,9 +3,12 @@
 // `./generated.json` is written by scripts/fetch-verified.mjs before every build
 // (`predev` / `prebuild` → `node scripts/fetch-verified.mjs`). It inlines:
 //   index.json + verified/{app}/current.json + verified/{app}/versions/*.json
-//   + data/{app}/releases.json + data/stats.json
+//   (per-app capped at VERSIONS_PER_APP) + the release notes matching verified
+//   versions (bodies truncated) + data/stats.json
 // so SSR (prerender) and CSR hydrate from the exact same payload — the site stays
 // purely static with zero runtime fetches (docs/website-design.md §5.1).
+// The full upstream release list lives in data/{app}/releases.json (build
+// intermediate, not bundled).
 //
 // Screenshots are NOT part of this module: they are mirrored as files under
 // public/screenshots/<key path> and referenced by the site-relative path derived

@@ -96,7 +96,6 @@ export interface CostEstimate {
 }
 
 export interface Deploy {
-  launch_url: string;
   documentation_url: string;
   regions: string[];
   instance_type: string;

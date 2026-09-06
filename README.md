@@ -15,15 +15,22 @@ CoreNova Launch 官网（Repo A）—— 中英双语静态站，消费 Repo C �
 ```bash
 npm ci
 
-# 开发模式（自动拉取 Repo C 的 fixtures 数据）
+# 首次取数（二选一）：
+#   a) 相邻目录有 CoreNovaLaunchVerify 仓（默认 dir 后端读它的 data/）
+#   b) 直接读公开 R2 端点（无需任何配置或相邻仓）
+VERIFIED_BACKEND=r2 npm run fetch-data
+
+# 开发模式（predev 自动重取数据，失败时容忍上次 payload）
 npm run dev
 
-# 生产构建
+# 生产构建（prebuild 严格取数，任何缺失即失败）
 npm run build
 
 # 预览构建产物
 npm run preview
 ```
+
+`src/data/generated.json` 是构建产物，**不入库**（deployment-contract §1 禁止第二事实源）；克隆后先执行上面的取数步骤，再 `npm run dev`。
 
 ## 数据来源
 
@@ -36,7 +43,7 @@ npm run preview
 | `data/stats.json` | GitHub API | Stars、验证成功率（拉不到则降级显示 `—`） |
 | `public/screenshots/` | Repo C 截图镜像 | 构建时从 Repo C 复制 |
 
-`scripts/fetch-verified.mjs` 在 `predev` 和 `prebuild` 时自动运行。默认读取 `../CoreNovaLaunchVerify/data/`（本地 fixtures 模式），接入 R2 时通过环境变量切换。
+`scripts/fetch-verified.mjs` 在 `predev` 和 `prebuild` 时自动运行。本地默认读取 `../CoreNovaLaunchVerify/data/`（dir 模式）；CI / 云端构建默认读公开 R2 端点（`r2` 模式），通过环境变量可显式覆盖。
 
 ## 环境变量
 

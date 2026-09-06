@@ -51,3 +51,13 @@ export const SOLUTIONS: Solution[] = [
 export function getSolution(slug: string): Solution | undefined {
   return SOLUTIONS.find((s) => s.slug === slug);
 }
+
+// Display fallback for roadmap apps that have no verified record yet: a readable
+// name instead of the raw slug (e.g. "open-webui" -> "Open WebUI"). Never used
+// for apps that exist — their display_name always wins.
+export function prettySlug(slug: string): string {
+  return slug
+    .split(/[-_]/)
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}

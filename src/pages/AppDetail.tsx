@@ -333,20 +333,6 @@ export function AppDetail() {
               {t("verification_provenance")}
             </h3>
             <div className="info-card-list">
-              {app.deploy.launch_url && (
-                <div className="info-card info-card--row">
-                  <span className="info-card__label">{t("launch_url")}</span>
-                  <a
-                    className="link-blue"
-                    href={app.deploy.launch_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {app.deploy.launch_url.replace(/^https?:\/\//, "")}{" "}
-                    <ExternalLinkIcon size={12} />
-                  </a>
-                </div>
-              )}
               <div className="info-card info-card--row">
                 <span className="info-card__label">{t("verification_id")}</span>
                 <span className="info-card__value mono">{app.verification_id}</span>

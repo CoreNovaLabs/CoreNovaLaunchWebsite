@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useI18n, pick } from "../i18n";
 import { useApps } from "../data/useAppData";
-import { getSolution } from "../data/solutions";
+import { getSolution, prettySlug } from "../data/solutions";
 import { AppCard, useLocalePath } from "../components/ui";
 import { useTitle } from "../lib/hooks";
 
@@ -28,9 +28,14 @@ export function SolutionDetail() {
     );
   }
 
+  // Solutions reference the roadmap too: apps without a verified record yet render as
+  // "coming soon" instead of silently vanishing (an empty included list looks broken).
   const included = sol.apps
     .map((s) => apps.find((a) => a.app === s))
     .filter((a): a is NonNullable<typeof a> => Boolean(a));
+  const planned = sol.apps.filter(
+    (s) => !apps.some((a) => a.app === s)
+  );
 
   return (
     <section className="section">
@@ -78,6 +83,14 @@ export function SolutionDetail() {
               </a>
             </li>
           ))}
+          {planned.map((s) => (
+            <li key={s}>
+              <span className="name">{prettySlug(s)}</span>
+              <span className="update-row__ver stack-list__version">
+                {t("coming_soon")}
+              </span>
+            </li>
+          ))}
         </ul>
 
         {sol.architecture && (
@@ -87,7 +100,7 @@ export function SolutionDetail() {
         )}
 
         <h2 className="solution-detail__subheading solution-detail__subheading--spaced">
-          {locale === "zh" ? "包含应用" : "Included apps"}
+          {t("included_apps")}
         </h2>
         <div className="grid">
           {included.map((a) => (

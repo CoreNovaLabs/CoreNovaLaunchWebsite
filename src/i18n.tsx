@@ -172,6 +172,8 @@ const en: Dict = {
   view_solution: "View solution",
   deploy_full_stack: "Deploy full stack",
   whats_included: "What's included (deploy in order):",
+  included_apps: "Included apps",
+  coming_soon: "Coming soon",
   architecture_label: "Architecture",
   // footer / misc
   footer_github: "GitHub",
@@ -343,6 +345,8 @@ const zh: Dict = {
   view_solution: "查看方案",
   deploy_full_stack: "部署整套方案",
   whats_included: "包含内容（按序部署）：",
+  included_apps: "包含应用",
+  coming_soon: "即将上线",
   architecture_label: "架构",
   footer_github: "GitHub",
   footer_docs: "文档",

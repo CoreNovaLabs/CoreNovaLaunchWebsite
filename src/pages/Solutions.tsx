@@ -1,6 +1,6 @@
 import { useI18n, pick } from "../i18n";
 import { useApps } from "../data/useAppData";
-import { SOLUTIONS } from "../data/solutions";
+import { SOLUTIONS, prettySlug } from "../data/solutions";
 import { useLocalePath } from "../components/ui";
 import { useTitle } from "../lib/hooks";
 
@@ -15,7 +15,7 @@ export function Solutions() {
   );
 
   const nameOf = (slug: string) =>
-    apps.find((a) => a.app === slug)?.display_name[locale] ?? slug;
+    apps.find((a) => a.app === slug)?.display_name[locale] ?? prettySlug(slug);
 
   return (
     <section className="section">
