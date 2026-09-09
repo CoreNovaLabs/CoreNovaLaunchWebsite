@@ -7,7 +7,7 @@ import { VerifiedBadge, ReleaseBadge, PlatformBadge, useLocalePath } from "../co
 import { DeployGuide } from "../components/DeployGuide";
 import { CheckCircleIcon } from "../components/Icons";
 import { formatDate } from "../lib/format";
-import { buildDeployUrl } from "../lib/deploy";
+import { buildDeployUrl, verifiedDeployOptions } from "../lib/deploy";
 import { useTitle } from "../lib/hooks";
 import { CHECK_ROWS } from "../data/types";
 import type { AppVersionRecord } from "../data/types";
@@ -66,11 +66,12 @@ export function Versions() {
           {t("back_to_app", { app: name })}
         </a>
 
-        <table className="vtable vtable--spaced">
+        <div className="table-scroll table-scroll--spaced" tabIndex={0}>
+        <table className="vtable">
           <thead>
             <tr>
               <th>{t("versions")}</th>
-              <th>{t("release_date")}</th>
+              <th>{t("verified_date")}</th>
               <th>{t("verified")}</th>
               <th>{t("status")}</th>
               <th>{t("aws_tested")}</th>
@@ -80,6 +81,7 @@ export function Versions() {
           <tbody>
             {versions.map((rec) => {
               const m = rec.manifest;
+              const deployOptions = verifiedDeployOptions(rec.current, m.container.digest);
               return (
                 <Fragment key={m.app_version}>
                   <tr>
@@ -99,23 +101,12 @@ export function Versions() {
                         {/* Deep link pinned to THIS row's verified digest (§3.2). */}
                         <button
                           className="btn btn--primary btn--sm"
-                          title={t("deploy_new_stack_hint")}
+                          disabled={!deployOptions}
+                          title={deployOptions ? t("deploy_new_stack_hint") : t("deploy_contract_missing")}
                           onClick={() => {
-                            const d = rec.current.deploy;
-                            window.open(
-                              buildDeployUrl({
-                                app: app.app,
-                                dockerImage: d.docker_image,
-                                digest: m.container.digest,
-                                containerPort: d.container_port,
-                                region: d.regions[0] || "us-east-1",
-                                instanceType: d.instance_type,
-                                diskGb: 30,
-                                extraEnvironment: d.extra_environment,
-                              }),
-                              "_blank",
-                              "noopener"
-                            );
+                            if (deployOptions) {
+                              window.open(buildDeployUrl(deployOptions), "_blank", "noopener");
+                            }
                           }}
                         >
                           {t("deploy")}
@@ -155,6 +146,7 @@ export function Versions() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );
@@ -337,7 +329,9 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
             </p>
           </div>
           {/* 标准化部署后指引（与详情页同一数据源/组件，消灭重复文案） */}
-          <DeployGuide app={rec.current} />
+          {verifiedDeployOptions(rec.current, m.container.digest) && (
+            <DeployGuide app={rec.current} />
+          )}
         </div>
       )}
     </div>

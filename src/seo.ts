@@ -5,6 +5,7 @@ import { SOLUTIONS } from "./data/solutions";
 import { DOCS, docVariant } from "./content/docs";
 import { APP_FAQ } from "./data/faq";
 import { dicts } from "./i18n";
+import { hasVerifiedRuntimeContract } from "./lib/deploy";
 
 // Build-time SEO metadata for prerendered routes (docs/website-design.md §4).
 // Consumed by scripts/prerender.mjs via src/entry-server.tsx.
@@ -54,8 +55,8 @@ function homeRoutes(lang: Locale): PrerenderRoute {
     path: routePath(lang),
     lang,
     title: lang === "zh"
-      ? "在 AWS 上一键部署开源软件 | CoreNova Launch"
-      : "Open Source Software One-Click Deploy to AWS | CoreNova Launch",
+      ? "把已验证开源软件部署到你的 AWS | CoreNova Launch"
+      : "Deploy Verified Open Source Apps to Your AWS | CoreNova Launch",
     description: t(lang, "hero_subtitle"),
     jsonLd: [
       {
@@ -198,13 +199,20 @@ function solutionDetailRoutes(): PrerenderRoute[] {
   return SOLUTIONS.flatMap((sol) =>
     LOCALES.map((lang) => {
       const path = routePath(lang, `/solutions/${sol.slug}/`);
+      const ready = sol.apps.every((slug) =>
+        APPS_BY_INDEX.some((app) => app.app === slug && hasVerifiedRuntimeContract(app))
+      );
       return {
         path,
         lang,
         title:
-          lang === "zh"
-            ? `${L(sol.title, lang)} 一键部署 AWS | ${BRAND}`
-            : `Deploy ${L(sol.title, lang)} on AWS | ${BRAND}`,
+          ready
+            ? lang === "zh"
+              ? `${L(sol.title, lang)} 部署到 AWS | ${BRAND}`
+              : `Deploy ${L(sol.title, lang)} on AWS | ${BRAND}`
+            : lang === "zh"
+              ? `${L(sol.title, lang)} 路线图 | ${BRAND}`
+              : `${L(sol.title, lang)} Roadmap | ${BRAND}`,
         description: L(sol.description, lang),
         jsonLd: [
           breadcrumb([

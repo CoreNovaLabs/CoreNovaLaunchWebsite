@@ -24,8 +24,9 @@ export function Solutions() {
         <p className="page-subtitle">{t("solutions_subtitle")}</p>
 
         <div className="solutions-grid">
-          {SOLUTIONS.map((s) => (
-            <div className="solution-card" key={s.slug}>
+          {SOLUTIONS.map((s) => {
+            const verifiedCount = s.apps.filter((slug) => apps.some((a) => a.app === slug)).length;
+            return <div className="solution-card" key={s.slug}>
               <div className="solution-card__icon">{s.icon}</div>
               <h3 className="solution-card__title">{pick(locale, s.title)}</h3>
               <p className="solution-card__desc">{pick(locale, s.description)}</p>
@@ -38,14 +39,17 @@ export function Solutions() {
                 ))}{" "}
                 ({s.apps.length} {locale === "zh" ? "款" : "apps"})
               </div>
+              <p className="solution-card__status">
+                {t("roadmap_status", { verified: verifiedCount, total: s.apps.length })}
+              </p>
               <a
                 className="link-blue"
                 href={l(`/solutions/${s.slug}/`)}
               >
                 {t("view_solution")} →
               </a>
-            </div>
-          ))}
+            </div>;
+          })}
         </div>
       </div>
     </section>

@@ -4,7 +4,7 @@ import { useI18n, pick } from "../i18n";
 import { useApp, useVersions, useStars, orderedScreenshots } from "../data/useAppData";
 import { VerifiedBadge, ReleaseBadge, useLocalePath, PlatformBadge, IconAvatar, TimeAgo } from "../components/ui";
 import { formatDate } from "../lib/format";
-import { ONE_CLICK_TEMPLATE_URL, buildDeployUrl } from "../lib/deploy";
+import { buildDeployUrl, verifiedDeployOptions } from "../lib/deploy";
 import { DeployGuide, DeployQuickRef } from "../components/DeployGuide";
 import { useTitle } from "../lib/hooks";
 import { CATEGORIES } from "../data/categories";
@@ -12,7 +12,6 @@ import { APP_FAQ } from "../data/faq";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
-  DownloadIcon,
   ExternalLinkIcon,
   LockIcon,
   RocketIcon,
@@ -38,9 +37,6 @@ export function AppDetail() {
   const [zoom, setZoom] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [deployMsg, setDeployMsg] = useState("");
-  const [selectedInstanceType, setSelectedInstanceType] = useState("");
-  const [selectedDiskGb, setSelectedDiskGb] = useState(30);
-  const [selectedRegion, setSelectedRegion] = useState("");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const stars = useStars(app?.app);
 
@@ -69,14 +65,6 @@ export function AppDetail() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [app]);
-
-  // 初始化部署选项：verified 的实例档和磁盘大小作为默认值
-  useEffect(() => {
-    if (app && !selectedInstanceType) {
-      setSelectedInstanceType(app.deploy.instance_type);
-      setSelectedRegion(app.deploy.regions[0] || "us-east-1");
-    }
-  }, [app, selectedInstanceType]);
 
   // All hooks must run before any conditional return — `shots` is derived
   // ahead of the `!app` guard so the lightbox effect can depend on it.
@@ -113,23 +101,22 @@ export function AppDetail() {
   const name = pick(locale, app.display_name);
   const desc = pick(locale, app.description);
   const recent = versions.slice(0, 4);
+  const verifiedRecord =
+    versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
+  const deployOptions = verifiedDeployOptions(
+    verifiedRecord?.current ?? app,
+    verifiedRecord?.manifest.container.digest
+  );
 
   // Deploy on AWS：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
   // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
   // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
   const generateDeploy = () => {
-    const verified =
-      versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
-    const url = buildDeployUrl({
-      app: app.app,
-      dockerImage: app.deploy.docker_image,
-      digest: verified?.manifest.container.digest,
-      containerPort: app.deploy.container_port,
-      region: selectedRegion || app.deploy.regions[0] || "us-east-1",
-      instanceType: selectedInstanceType || app.deploy.instance_type,
-      diskGb: selectedDiskGb,
-      extraEnvironment: app.deploy.extra_environment,
-    });
+    if (!deployOptions) {
+      setDeployMsg(t("deploy_contract_missing"));
+      return null;
+    }
+    const url = buildDeployUrl(deployOptions);
     window.open(url, "_blank", "noopener");
     return url;
   };
@@ -148,7 +135,10 @@ export function AppDetail() {
     { label: t("supported_architectures"), value: app.architecture },
     { label: t("aws_regions"), value: app.deploy.regions.join(", ") },
     { label: "Instance", value: app.deploy.instance_type },
-    ...(app.deploy.cost_estimate
+    ...(app.deploy.data_volume_gb
+      ? [{ label: t("data_volume_label"), value: `${app.deploy.data_volume_gb} GB` }]
+      : []),
+    ...(deployOptions && app.deploy.cost_estimate
       ? [
           {
             label: t("est_cost"),
@@ -213,7 +203,7 @@ export function AppDetail() {
                   setDeployMsg(t("deploy_hint"));
                 }}
               >
-                {t("deploy_now")} <ArrowRightIcon size={16} />
+                {deployOptions ? t("deploy_now") : t("view_deployment")} <ArrowRightIcon size={16} />
               </button>
               <a className="btn btn--ghost" href={app.deploy.documentation_url} target="_blank" rel="noreferrer">
                 {t("view_documentation")} <ExternalLinkIcon size={16} />
@@ -309,7 +299,7 @@ export function AppDetail() {
                   ))}
                 </ul>
               )}
-              <DeployQuickRef app={app} />
+              {deployOptions && <DeployQuickRef app={app} />}
           </div>
 
           {/* right sidebar */}
@@ -382,62 +372,38 @@ export function AppDetail() {
                 <div className="quick-deploy__row">
                   <div className="quick-deploy__field">
                     <label>{t("aws_regions")}</label>
-                    <select
-                      className="select"
-                      value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                    >
-                      {app.deploy.regions.map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
+                    <output className="quick-deploy__verified-value">
+                      {app.deploy.regions[0] || app.region}
+                    </output>
                   </div>
                   <div className="quick-deploy__field">
                     <label>{t("instance_label")}</label>
-                    <select
-                      className="select"
-                      value={selectedInstanceType}
-                      onChange={(e) => setSelectedInstanceType(e.target.value)}
-                    >
-                      {["t3.micro", "t3.small", "t3.medium", "t3.large", "t3.xlarge"].map((type) => (
-                        <option key={type} value={type}>
-                          {type}{type === app.deploy.instance_type ? " ✓" : ""}
-                        </option>
-                      ))}
-                    </select>
+                    <output className="quick-deploy__verified-value">
+                      {app.deploy.instance_type}
+                    </output>
                   </div>
                   <div className="quick-deploy__field">
-                    <label>{t("disk_gb_label")}</label>
-                    <select
-                      className="select"
-                      value={selectedDiskGb}
-                      onChange={(e) => setSelectedDiskGb(Number(e.target.value))}
-                    >
-                      {[30, 50, 100, 200, 500].map((gb) => (
-                        <option key={gb} value={gb}>{gb} GB</option>
-                      ))}
-                    </select>
+                    <label>{t("data_volume_label")}</label>
+                    <output className="quick-deploy__verified-value">
+                      {app.deploy.data_volume_gb ? `${app.deploy.data_volume_gb} GB` : "—"}
+                    </output>
                   </div>
                 </div>
                 <div className="quick-deploy__btn">
                   <button
                     className="btn btn--primary"
+                    disabled={!deployOptions}
                     onClick={() => {
-                      generateDeploy();
-                      setDeployMsg(t("template_console_hint"));
+                      if (generateDeploy()) setDeployMsg(t("template_console_hint"));
                     }}
                   >
                     <RocketIcon size={16} /> {t("generate_template")}
                   </button>
-                  <a
-                    className="btn btn--outline"
-                    href={ONE_CLICK_TEMPLATE_URL}
-                    download
-                  >
-                    <DownloadIcon size={16} /> {t("download_template")}
-                  </a>
                 </div>
-                {app.deploy.cost_estimate && (
+                {!deployOptions && (
+                  <p className="deploy-msg">{t("deploy_contract_missing")}</p>
+                )}
+                {deployOptions && app.deploy.cost_estimate && (
                   <p className="quick-deploy__cost">
                     <strong>{t("est_cost_value", { usd: app.deploy.cost_estimate.monthly_usd })}</strong>
                     {app.deploy.cost_estimate.note &&
@@ -445,7 +411,7 @@ export function AppDetail() {
                   </p>
                 )}
           </div>
-          <DeployGuide app={app} />
+          {deployOptions && <DeployGuide app={app} />}
         </div>
 
         {/* versions */}
@@ -611,35 +577,37 @@ function VersionTable({
     );
   }
   return (
-    <table className="vtable">
-      <thead>
-        <tr>
-          <th>{t("versions")}</th>
-          <th>{t("release_date")}</th>
-          <th>{t("verified")}</th>
-          <th>{t("status")}</th>
-          <th>{t("aws_tested")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {versions.map(({ manifest, current }) => (
-          <tr key={manifest.app_version}>
-            <td className="mono">{manifest.app_version}</td>
-            <td>{formatDate(manifest.verified_at, locale)}</td>
-            <td>
-              <span className="badge badge--verified">
-                <CheckCircleIcon size={12} /> {t("verified")}
-              </span>
-            </td>
-            <td>
-              <ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} />
-            </td>
-            <td>
-              <PlatformBadge platform={manifest.verification.platform} />
-            </td>
+    <div className="table-scroll" tabIndex={0}>
+      <table className="vtable">
+        <thead>
+          <tr>
+            <th>{t("versions")}</th>
+            <th>{t("verified_date")}</th>
+            <th>{t("verified")}</th>
+            <th>{t("status")}</th>
+            <th>{t("aws_tested")}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {versions.map(({ manifest, current }) => (
+            <tr key={manifest.app_version}>
+              <td className="mono">{manifest.app_version}</td>
+              <td>{formatDate(manifest.verified_at, locale)}</td>
+              <td>
+                <span className="badge badge--verified">
+                  <CheckCircleIcon size={12} /> {t("verified")}
+                </span>
+              </td>
+              <td>
+                <ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} />
+              </td>
+              <td>
+                <PlatformBadge platform={manifest.verification.platform} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

@@ -99,12 +99,15 @@ export interface Deploy {
   documentation_url: string;
   regions: string[];
   instance_type: string;
+  data_volume_gb?: number;
   container_port: number;
+  health_check_path?: string;
   docker_image: string;
   extra_environment?: string[];
   post_deploy?: PostDeploy;
   cost_estimate?: CostEstimate;
   data_path?: string;
+  app_url_env_name?: string;
 }
 
 export interface ReleaseInfo {

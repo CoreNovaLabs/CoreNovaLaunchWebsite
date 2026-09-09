@@ -158,7 +158,7 @@ export const AppCard = memo(function AppCard({ app }: { app: AppCurrent }) {
         </div>
       </div>
       <div className="app-card__deploy">
-        <span className="btn btn--primary btn--xs">{t("deploy")}</span>
+        <span className="btn btn--primary btn--xs">{t("view")}</span>
       </div>
     </Link>
   );
@@ -180,7 +180,7 @@ export const AppCardVertical = memo(function AppCardVertical({ app }: { app: App
         <p className="app-card__desc">{pick(locale, app.description)}</p>
         <div className="app-card__footer">
           <span className="app-card__version app-card__version--plain">{app.app_version}</span>
-          <span className="btn btn--outline btn--xs app-card__deploy-btn">{t("deploy")}</span>
+          <span className="btn btn--outline btn--xs app-card__deploy-btn">{t("view")}</span>
         </div>
       </div>
     </Link>

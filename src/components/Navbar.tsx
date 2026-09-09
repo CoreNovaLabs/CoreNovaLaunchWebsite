@@ -146,6 +146,15 @@ export function Navbar() {
       </div>
       {mobileOpen && (
         <nav className="navbar__mobile-menu">
+          <form onSubmit={onSearch} className="navbar__mobile-search">
+            <SearchIcon size={16} />
+            <input
+              placeholder={t("search_placeholder")}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              aria-label={t("search_placeholder")}
+            />
+          </form>
           {navItems.map((item) => (
             <a
               key={item.key}

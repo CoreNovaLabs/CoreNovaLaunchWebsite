@@ -498,7 +498,7 @@ button {
 }
 .stats__grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   padding-top: var(--space-10);
   padding-bottom: var(--space-10);
   gap: 0;
@@ -1460,6 +1460,19 @@ button {
 .quick-deploy__field .select {
   width: 100%;
 }
+.quick-deploy__verified-value {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--bg-sub);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: var(--fw-semibold);
+}
 .quick-deploy__btn {
   display: flex;
   gap: var(--space-4);
@@ -1516,6 +1529,19 @@ button {
 }
 
 /* ----------------------------- versions table --------------------------- */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  -webkit-overflow-scrolling: touch;
+}
+.table-scroll--spaced {
+  margin-top: var(--space-4);
+}
+.table-scroll:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
 .vtable {
   width: 100%;
   border-collapse: separate;
@@ -1808,7 +1834,13 @@ button {
 .solution-card__apps {
   font-size: var(--fs-body);
   color: var(--text-sub);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-3);
+}
+.solution-card__status {
+  margin: 0 0 var(--space-5);
+  font-size: var(--fs-caption);
+  color: var(--text-weak);
+  font-weight: var(--fw-semibold);
 }
 .solution-detail__header {
   display: flex;
@@ -2042,7 +2074,7 @@ button {
     padding: var(--space-10) 0;
   }
   .stats__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 14px;
     padding-top: var(--space-8);
     padding-bottom: var(--space-8);
@@ -2089,6 +2121,27 @@ button {
   .navbar__mobile-link.is-active {
     color: var(--text);
     background: var(--bg-sub);
+  }
+  .navbar__mobile-search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-2) 0;
+    padding: 0 var(--space-3);
+    min-height: 42px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--card);
+    color: var(--text-weak);
+  }
+  .navbar__mobile-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
   }
   .footer__inner {
     grid-template-columns: 1fr 1fr;
@@ -2152,8 +2205,7 @@ button {
     min-width: 0;
   }
   .vtable {
-    display: block;
-    overflow-x: auto;
+    min-width: 720px;
   }
   .vdetail__cols {
     grid-template-columns: 1fr;

@@ -65,7 +65,7 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
     <div className="deploy-guide">
       <h3 className="deploy-guide__title">{t("deploy_guide_title")}</h3>
       <ol className="deploy-guide__steps">
-        <li>{t("deploy_guide_step1", { stack: stackNameFor(app.app) })}</li>
+        <li>{t("deploy_guide_step1", { stack: stackNameFor(app.app, app.app_version) })}</li>
         <li>{t("deploy_guide_step2")}</li>
         <li>
           {t("deploy_guide_step3")}

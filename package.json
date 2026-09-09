@@ -12,6 +12,7 @@
     "dev": "vite",
     "fetch-data": "node scripts/fetch-verified.mjs",
     "prebuild": "node scripts/fetch-verified.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir .ssr && node scripts/prerender.mjs",
     "preview": "vite preview --host"
   },

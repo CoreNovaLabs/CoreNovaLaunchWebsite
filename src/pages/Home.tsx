@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useI18n, pick } from "../i18n";
+import { useI18n } from "../i18n";
 import { useApps, useStats } from "../data/useAppData";
-import { AppCardVertical, IconAvatar, ReleaseBadge, useLocalePath, VerifiedBadge, TimeAgo } from "../components/ui";
+import { AppCardVertical, useLocalePath } from "../components/ui";
 import { HeroArt } from "../components/HeroArt";
 import { useTitle } from "../lib/hooks";
 import {
@@ -24,41 +24,34 @@ const FEATURES = [
 const FEATURE_EN: Record<string, { title: string; desc: string }> = {
   why_verified: {
     title: "Pre-Verified",
-    desc: "Every version is automatically tested for compatibility and stability on AWS.",
+    desc: "Every listed version passes repeatable application checks and references a valid AWS platform verification record.",
   },
   why_click: {
-    title: "One-Click Deploy",
-    desc: "Deploy production-ready software with optimized CloudFormation templates.",
+    title: "Verified Deploy",
+    desc: "CloudFormation opens with the exact image, AMI, storage path and health check from verification.",
   },
   why_updated: {
-    title: "Always Updated",
-    desc: "Continuous monitoring of upstream releases and security updates.",
+    title: "Evidence Before Listing",
+    desc: "Upstream releases appear here only after the current verification gates pass.",
   },
   why_multi: {
-    title: "Multi-Region",
-    desc: "Support for all AWS regions with optimized configurations and pricing.",
+    title: "Clear Region Scope",
+    desc: "us-east-1 is the verified region today; additional regions will be listed only after verification.",
   },
   why_secure: {
-    title: "Secure & Reliable",
-    desc: "Built with security best practices and enterprise-grade reliability.",
+    title: "Your AWS Account",
+    desc: "Resources stay in your account, SSH ingress stays closed, and remote operations use AWS Systems Manager.",
   },
 };
 const FEATURE_ZH: Record<string, { title: string; desc: string }> = {
-  why_verified: { title: "预验证", desc: "每个版本都在 AWS 上自动完成兼容性与稳定性测试。" },
-  why_click: { title: "一键部署", desc: "使用优化的 CloudFormation 模板部署生产级软件。" },
-  why_updated: { title: "持续更新", desc: "持续跟踪上游发布与安全更新。" },
-  why_multi: { title: "多区域", desc: "支持全部 AWS 区域，并提供优化的配置与定价。" },
-  why_secure: { title: "安全可信", desc: "遵循安全最佳实践，具备企业级可靠性。" },
+  why_verified: { title: "有证据的验证", desc: "每个上架版本都通过可重复的应用检查，并引用有效的 AWS 平台验证记录。" },
+  why_click: { title: "按验证结果部署", desc: "CloudFormation 会预填验证时使用的镜像、AMI、数据目录和健康检查。" },
+  why_updated: { title: "先验证再上架", desc: "跟踪上游版本，但只有通过当前验证门禁后才会展示。" },
+  why_multi: { title: "区域范围透明", desc: "当前仅验证 us-east-1；新增区域会在完成验证后再展示。" },
+  why_secure: { title: "资源归你", desc: "资源保留在你的 AWS 账号中，不开放 SSH 入站，远程运维使用 AWS Systems Manager。" },
 };
 
-const REGIONS = [
-  { code: "us-east-1", city: "N. Virginia" },
-  { code: "us-west-2", city: "Oregon" },
-  { code: "eu-west-1", city: "Ireland" },
-  { code: "eu-central-1", city: "Frankfurt" },
-  { code: "ap-southeast-1", city: "Singapore" },
-  { code: "ap-northeast-1", city: "Tokyo" },
-];
+const REGION_NAMES: Record<string, string> = { "us-east-1": "N. Virginia" };
 
 export function Home() {
   const { locale, t } = useI18n();
@@ -68,14 +61,12 @@ export function Home() {
   const stats = useStats();
   useTitle(
     locale === "zh"
-      ? "在 AWS 上一键部署开源软件 | CoreNova Launch"
-      : "Open Source Software One-Click Deploy to AWS | CoreNova Launch"
+      ? "把已验证开源软件部署到你的 AWS | CoreNova Launch"
+      : "Deploy Verified Open Source Apps to Your AWS | CoreNova Launch"
   );
 
   const featured = apps.filter((a) => a.featured).slice(0, 5);
-  const latest = [...apps]
-    .sort((a, b) => +new Date(b.verified_at) - +new Date(a.verified_at))
-    .slice(0, 5);
+  const verifiedRegions = [...new Set(apps.flatMap((a) => a.deploy.regions))].sort();
 
   return (
     <>
@@ -87,14 +78,14 @@ export function Home() {
               {locale === "zh" ? (
                 <>
                   <span>
-                    在 <span className="accent">AWS</span> 上
+                    把已验证开源软件
                   </span>
-                  <span>一键部署开源软件</span>
+                  <span>部署到你的 <span className="accent">AWS</span></span>
                 </>
               ) : (
                 <>
-                  <span>One-Click Deploy</span>
-                  <span>Open Source Software</span>
+                  <span>Deploy Verified</span>
+                  <span>Open Source Apps</span>
                   <span>
                     on <span className="accent">AWS</span>
                   </span>
@@ -117,8 +108,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Stats — every number is computed at build time (deployment-contract §5); a
-          degraded stat renders "—" instead of a stale or invented value. */}
+      {/* Stats — every number is computed from the build-time verified dataset. */}
       <section className="stats">
         <div className="container">
           <div className="stats__grid">
@@ -131,21 +121,8 @@ export function Home() {
             <div className="stat__label">{locale === "zh" ? "已验证版本" : "Verified Versions"}</div>
           </div>
           <div className="stat">
-            <div className="stat__num">
-              {stats.success_rate != null ? `${stats.success_rate.value.toFixed(1)}%` : "—"}
-            </div>
-            <div className="stat__label">
-              {(locale === "zh" ? "验证成功率" : "Success Rate") +
-                (stats.success_rate
-                  ? locale === "zh"
-                    ? `（近 ${stats.success_rate.window_days} 天）`
-                    : ` (last ${stats.success_rate.window_days} days)`
-                  : "")}
-            </div>
-          </div>
-          <div className="stat">
-            <div className="stat__num">24/7</div>
-            <div className="stat__label">{t("automated_testing")}</div>
+            <div className="stat__num">{verifiedRegions.length}</div>
+            <div className="stat__label">{locale === "zh" ? "已验证 AWS 区域" : "Verified AWS Region"}</div>
           </div>
           </div>
         </div>
@@ -199,40 +176,6 @@ export function Home() {
         </div>
       </section>
 
-      {/* Latest updates */}
-      <section className="section">
-        <div className="container">
-          <div className="section__head">
-            <h2 className="section__title">{t("latest_updates")}</h2>
-            <a
-              className="section__link"
-              href={l("/updates")}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(l("/updates"));
-              }}
-            >
-              {t("view_all_updates")} <ArrowRightIcon size={14} />
-            </a>
-          </div>
-          <div className="updates-list">
-            {latest.map((a) => (
-              <div className="update-row update-row--inline" key={a.app}>
-                <IconAvatar name={pick(locale, a.display_name)} app={a.app} icon={a.icon} size={36} />
-                <div className="update-row__main">
-                  <span className="update-row__name">{pick(locale, a.display_name)}</span>
-                  <span className="update-row__ver">{a.app_version}</span>
-                  <VerifiedBadge />
-                </div>
-                <div className="update-row__summary">{pick(locale, a.description)}</div>
-                <ReleaseBadge type={a.release.type} />
-                <div className="update-row__time"><TimeAgo iso={a.verified_at} /></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Region support */}
       <section className="section region-section">
         <div className="container">
@@ -240,10 +183,10 @@ export function Home() {
             <h2 className="region-section__title">{t("aws_region_support")}</h2>
           </div>
           <div className="region-grid">
-            {REGIONS.map((r) => (
-              <div className="region-card" key={r.code}>
-                <div className="region-card__code">{r.code}</div>
-                <div className="region-card__city">{r.city}</div>
+            {verifiedRegions.map((code) => (
+              <div className="region-card" key={code}>
+                <div className="region-card__code">{code}</div>
+                <div className="region-card__city">{REGION_NAMES[code] ?? code}</div>
               </div>
             ))}
           </div>

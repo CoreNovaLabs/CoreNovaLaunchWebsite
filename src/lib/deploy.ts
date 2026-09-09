@@ -1,3 +1,5 @@
+import type { AppCurrent } from "../data/types";
+
 // one-click 模板的公开分发 URL（deployment-contract.md §2.4）。
 //
 // Repo C 的 publish-template.yml 把模板发布到公开读 S3（us-east-1），CloudFormation
@@ -7,38 +9,109 @@
 // 默认值须与 Repo C 的 TEMPLATE_S3_BUCKET 指向同一只桶；换桶时用构建期
 // VITE_ONE_CLICK_TEMPLATE_URL 覆盖，两边一起改，深链与发布物才不会指向两只桶。
 export const ONE_CLICK_TEMPLATE_URL: string =
-  import.meta.env.VITE_ONE_CLICK_TEMPLATE_URL ??
+  import.meta.env?.VITE_ONE_CLICK_TEMPLATE_URL ??
   "https://corenovalaunch-templates.s3.us-east-1.amazonaws.com/corenova-one-click.template.yaml";
 
 export interface DeployOptions {
   app: string;
+  appVersion: string;
   dockerImage: string;
-  digest?: string;
+  digest: string;
   containerPort: number;
   region: string;
+  amiId: string;
   instanceType: string;
-  diskGb: number;
+  dataVolumeGb: number;
+  dataContainerPath: string;
+  healthCheckPath: string;
+  appUrlEnvName?: string;
   extraEnvironment?: string[];
 }
 
 // Stack name the deep link creates — also quoted in the post-deploy guide,
 // so users know which stack's Outputs tab to open. Keep both in one place.
-export const stackNameFor = (app: string): string => `corenova-${app}`;
+export const stackNameFor = (app: string, appVersion: string): string => {
+  const identity = `${app}-${appVersion}`
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 110)
+    .replace(/-$/g, "");
+  return `corenova-${identity}`;
+};
+
+function required(value: string, name: string): string {
+  if (!value.trim()) throw new Error(`Missing verified deployment field: ${name}`);
+  return value;
+}
+
+// Old manifests do not contain the complete runtime contract. They must not silently
+// fall back to mutable template defaults while the UI still calls the result "verified".
+export function hasVerifiedRuntimeContract(current: AppCurrent): boolean {
+  const d = current.deploy;
+  return Boolean(
+    current.ami_id &&
+    d.data_path &&
+    d.health_check_path &&
+    d.data_volume_gb &&
+    d.data_volume_gb >= 8
+  );
+}
+
+export function verifiedDeployOptions(
+  current: AppCurrent,
+  digest?: string
+): DeployOptions | null {
+  const d = current.deploy;
+  if (!digest || !hasVerifiedRuntimeContract(current)) {
+    return null;
+  }
+  return {
+    app: current.app,
+    appVersion: current.app_version,
+    dockerImage: d.docker_image,
+    digest,
+    containerPort: d.container_port,
+    region: d.regions[0] || current.region,
+    amiId: current.ami_id,
+    instanceType: d.instance_type,
+    dataVolumeGb: d.data_volume_gb!,
+    dataContainerPath: d.data_path!,
+    healthCheckPath: d.health_check_path!,
+    appUrlEnvName: d.app_url_env_name,
+    extraEnvironment: d.extra_environment,
+  };
+}
 
 // CloudFormation console deep link for the one-click template. The image is
 // pinned to the verified digest (tag@digest) when one is available, so what
 // gets deployed is byte-identical to what was verified.
 export function buildDeployUrl(o: DeployOptions): string {
-  const image = o.digest ? `${o.dockerImage}@${o.digest}` : o.dockerImage || o.app;
+  required(o.appVersion, "appVersion");
+  required(o.amiId, "amiId");
+  required(o.digest, "digest");
+  required(o.dataContainerPath, "dataContainerPath");
+  required(o.healthCheckPath, "healthCheckPath");
+  if (!Number.isFinite(o.dataVolumeGb) || o.dataVolumeGb < 8) {
+    throw new Error("Missing verified deployment field: dataVolumeGb");
+  }
+  const image = `${required(o.dockerImage, "dockerImage")}@${o.digest}`;
   let url =
     `https://${o.region}.console.aws.amazon.com/cloudformation/home?region=${o.region}` +
-    `#/stacks/create/review?stackName=${stackNameFor(o.app)}` +
+    `#/stacks/create/review?stackName=${stackNameFor(o.app, o.appVersion)}` +
     `&templateURL=${encodeURIComponent(ONE_CLICK_TEMPLATE_URL)}` +
     `&param_AppName=${encodeURIComponent(o.app)}` +
     `&param_ImageReference=${encodeURIComponent(image)}` +
     `&param_ContainerPort=${o.containerPort}` +
+    `&param_AmiId=${encodeURIComponent(o.amiId)}` +
     `&param_InstanceType=${encodeURIComponent(o.instanceType)}` +
-    `&param_DiskGb=${o.diskGb}`;
+    `&param_DataVolumeSize=${o.dataVolumeGb}` +
+    `&param_DataContainerPath=${encodeURIComponent(o.dataContainerPath)}` +
+    `&param_HealthCheckPath=${encodeURIComponent(o.healthCheckPath)}`;
+  if (o.appUrlEnvName) {
+    url += `&param_AppUrlEnvironmentName=${encodeURIComponent(o.appUrlEnvName)}`;
+  }
   const extra = o.extraEnvironment ?? [];
   if (extra.length > 0) {
     url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;

@@ -4,6 +4,8 @@ import { useApps } from "../data/useAppData";
 import { getSolution, prettySlug } from "../data/solutions";
 import { AppCard, useLocalePath } from "../components/ui";
 import { useTitle } from "../lib/hooks";
+import { REQUEST_APP_URL } from "../lib/links";
+import { hasVerifiedRuntimeContract } from "../lib/deploy";
 
 export function SolutionDetail() {
   const { slug } = useParams();
@@ -36,6 +38,8 @@ export function SolutionDetail() {
   const planned = sol.apps.filter(
     (s) => !apps.some((a) => a.app === s)
   );
+  const fullStackReady =
+    included.length === sol.apps.length && included.every(hasVerifiedRuntimeContract);
 
   return (
     <section className="section">
@@ -61,14 +65,25 @@ export function SolutionDetail() {
         <p className="page-subtitle page-subtitle--narrow">
           {pick(locale, sol.description)}
         </p>
-        <button
-          className="btn btn--primary solution-detail__deploy"
-          onClick={() => {
-            document.querySelector(".stack-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-        >
-          {t("deploy_full_stack")}
-        </button>
+        {fullStackReady ? (
+          <button
+            className="btn btn--primary solution-detail__deploy"
+            onClick={() => {
+              document.querySelector(".stack-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            {t("deploy_full_stack")}
+          </button>
+        ) : (
+          <a
+            className="btn btn--primary solution-detail__deploy"
+            href={REQUEST_APP_URL}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("request_solution")}
+          </a>
+        )}
 
         <h2 className="solution-detail__subheading">{t("whats_included")}</h2>
         <ul className="stack-list">
@@ -79,7 +94,7 @@ export function SolutionDetail() {
                 {a.app_version}
               </span>
               <a className="link-blue" href={l(`/apps/${a.app}/`)}>
-                {t("deploy_now")} →
+                {t("view")} →
               </a>
             </li>
           ))}
@@ -95,18 +110,23 @@ export function SolutionDetail() {
 
         {sol.architecture && (
           <div className="arch-note">
-            <b>{t("architecture_label")}:</b> {pick(locale, sol.architecture)}
+            <b>{fullStackReady ? t("architecture_label") : (locale === "zh" ? "规划架构" : "Planned architecture")}:</b>{" "}
+            {pick(locale, sol.architecture)}
           </div>
         )}
 
-        <h2 className="solution-detail__subheading solution-detail__subheading--spaced">
-          {t("included_apps")}
-        </h2>
-        <div className="grid">
-          {included.map((a) => (
-            <AppCard key={a.app} app={a} />
-          ))}
-        </div>
+        {included.length > 0 && (
+          <>
+            <h2 className="solution-detail__subheading solution-detail__subheading--spaced">
+              {t("included_apps")}
+            </h2>
+            <div className="grid">
+              {included.map((a) => (
+                <AppCard key={a.app} app={a} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
