@@ -1,1 +1,1 @@
-{"apps":["ghost", "gitea", "grafana", "jellyfin", "memos", "n8n", "portainer", "uptime-kuma", "vaultwarden", "vikunja"],"verification_id":"ghost-v6.63.0-20260909-002","updated_at":"2026-09-11T10:51:24Z"}
+{"apps":["firefly-iii", "freshrss", "ghost", "gitea", "grafana", "jellyfin", "memos", "metabase", "n8n", "netdata", "portainer", "uptime-kuma", "vaultwarden", "vikunja"],"verification_id":"firefly-iii-v6.6.6-20260911-001","updated_at":"2026-09-11T10:51:49Z"}
