@@ -28,6 +28,32 @@ export interface DeployOptions {
   extraEnvironment?: string[];
 }
 
+// User-selectable resource overrides. The verified Manifest remains the source of
+// the minimum/default values; the UI only offers upward choices from that baseline.
+// A larger choice is deployable but is deliberately not described as independently
+// verified (app-profiles.md §3/§5: upward sizing is allowed).
+const X86_T3_UPGRADE_ORDER = [
+  "t3.small",
+  "t3.medium",
+  "t3.large",
+  "t3.xlarge",
+  "t3.2xlarge",
+] as const;
+
+export function selectableInstanceTypes(verifiedDefault: string): string[] {
+  const index = X86_T3_UPGRADE_ORDER.indexOf(
+    verifiedDefault as (typeof X86_T3_UPGRADE_ORDER)[number]
+  );
+  return index >= 0 ? X86_T3_UPGRADE_ORDER.slice(index) : [verifiedDefault];
+}
+
+export function selectableDataVolumes(verifiedDefault: number): number[] {
+  if (!Number.isFinite(verifiedDefault) || verifiedDefault < 8) return [];
+  return [...new Set([verifiedDefault, verifiedDefault * 2, verifiedDefault * 4])]
+    .map(Math.round)
+    .filter((size) => size <= 4096);
+}
+
 // Stack name the deep link creates — also quoted in the post-deploy guide,
 // so users know which stack's Outputs tab to open. Keep both in one place.
 export const stackNameFor = (app: string, appVersion: string): string => {

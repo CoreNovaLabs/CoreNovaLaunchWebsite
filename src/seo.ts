@@ -3,7 +3,7 @@ import { APPS_BY_INDEX, siteScreenshotUrl } from "./data/generated";
 import { CATEGORIES } from "./data/categories";
 import { SOLUTIONS } from "./data/solutions";
 import { DOCS, docVariant } from "./content/docs";
-import { APP_FAQ } from "./data/faq";
+import { appFaq } from "./data/faq";
 import { dicts } from "./i18n";
 import { hasVerifiedRuntimeContract } from "./lib/deploy";
 
@@ -133,10 +133,10 @@ function appDetailRoutes(app: AppCurrent): PrerenderRoute[] {
         {
           "@context": "https://schema.org",
           "@type": "FAQPage",
-          mainEntity: APP_FAQ.map((item) => ({
+          mainEntity: appFaq(app).map((item) => ({
             "@type": "Question",
-            name: lang === "zh" ? "部署与验证是怎么分工的？" : "How do verification and deployment split?",
-            acceptedAnswer: { "@type": "Answer", text: L(item, lang) },
+            name: L(item.question, lang),
+            acceptedAnswer: { "@type": "Answer", text: L(item.answer, lang) },
           })),
         },
       ],

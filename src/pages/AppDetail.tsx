@@ -1,31 +1,43 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
-import { useI18n, pick } from "../i18n";
-import { useApp, useVersions, useStars, orderedScreenshots } from "../data/useAppData";
-import { VerifiedBadge, ReleaseBadge, useLocalePath, PlatformBadge, IconAvatar, TimeAgo } from "../components/ui";
-import { formatDate } from "../lib/format";
-import { buildDeployUrl, verifiedDeployOptions } from "../lib/deploy";
-import { DeployGuide, DeployQuickRef } from "../components/DeployGuide";
-import { useTitle } from "../lib/hooks";
-import { CATEGORIES } from "../data/categories";
-import { APP_FAQ } from "../data/faq";
+import { DeployGuide } from "../components/DeployGuide";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  CpuIcon,
   ExternalLinkIcon,
-  LockIcon,
+  GitCommitIcon,
+  HardDriveIcon,
+  PackageIcon,
   RocketIcon,
+  ShieldCheckIcon,
+  StarIcon,
 } from "../components/Icons";
+import {
+  IconAvatar,
+  PlatformBadge,
+  ReleaseBadge,
+  TimeAgo,
+  useLocalePath,
+} from "../components/ui";
+import { CATEGORIES } from "../data/categories";
+import { appFaq } from "../data/faq";
 import type { AppVersionRecord } from "../data/types";
+import { orderedScreenshots, useApp, useStars, useVersions } from "../data/useAppData";
+import { pick, useI18n } from "../i18n";
+import {
+  buildDeployUrl,
+  selectableDataVolumes,
+  selectableInstanceTypes,
+  verifiedDeployOptions,
+} from "../lib/deploy";
+import { formatDate } from "../lib/format";
+import { useTitle } from "../lib/hooks";
 
-const TABS = [
-  "overview",
-  "versions",
-  "deployment",
-  "configuration",
-  "updates",
-  "faq",
-] as const;
+const TABS = ["deployment", "versions", "configuration", "faq"] as const;
 
 export function AppDetail() {
   const { app: slug } = useParams();
@@ -33,58 +45,83 @@ export function AppDetail() {
   const l = useLocalePath();
   const app = useApp(slug);
   const versions = useVersions(slug);
+  const stars = useStars(app?.app);
+
   const [shot, setShot] = useState(0);
   const [zoom, setZoom] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const [activeTab, setActiveTab] = useState<string>(TABS[0]);
   const [deployMsg, setDeployMsg] = useState("");
+  const [selectedVersion, setSelectedVersion] = useState(app?.app_version ?? "");
+  const [selectedRegion, setSelectedRegion] = useState(app?.deploy.regions[0] ?? app?.region ?? "");
+  const [selectedInstance, setSelectedInstance] = useState(app?.deploy.instance_type ?? "");
+  const [selectedDataVolume, setSelectedDataVolume] = useState(app?.deploy.data_volume_gb ?? 0);
+
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
-  const stars = useStars(app?.app);
+  const navigatingRef = useRef(false);
+  const zoomTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const lightboxCloseRef = useRef<HTMLButtonElement | null>(null);
 
   useTitle(
     app
       ? locale === "zh"
         ? `一键部署 ${pick(locale, app.display_name)} 到 AWS - ${
-            CATEGORIES.find((c) => c.slug === app.category)?.name.zh ?? ""
+            CATEGORIES.find((category) => category.slug === app.category)?.name.zh ?? ""
           } | CoreNova Launch`
         : `Deploy ${pick(locale, app.display_name)} to AWS in One Click - ${
-            CATEGORIES.find((c) => c.slug === app.category)?.name.en ?? ""
+            CATEGORIES.find((category) => category.slug === app.category)?.name.en ?? ""
           } | CoreNova Launch`
       : "CoreNova Launch"
   );
 
   useEffect(() => {
     const onScroll = () => {
-      const offset = 120;
+      if (navigatingRef.current) return;
+      const offset = 124;
       let current: string = TABS[0];
       for (const id of TABS) {
-        const el = sectionRefs.current[id];
-        if (el && el.getBoundingClientRect().top - offset <= 0) current = id;
+        const element = sectionRefs.current[id];
+        if (element && element.getBoundingClientRect().top - offset <= 0) current = id;
       }
       setActiveTab(current);
     };
+    const onScrollEnd = () => { navigatingRef.current = false; };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("scrollend", onScrollEnd);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scrollend", onScrollEnd);
+    };
   }, [app]);
 
-  // All hooks must run before any conditional return — `shots` is derived
-  // ahead of the `!app` guard so the lightbox effect can depend on it.
+  useEffect(() => {
+    if (!app) return;
+    setSelectedVersion(app.app_version);
+    setSelectedRegion(app.deploy.regions[0] ?? app.region);
+    setSelectedInstance(app.deploy.instance_type);
+    setSelectedDataVolume(app.deploy.data_volume_gb ?? 0);
+    setDeployMsg("");
+  }, [app?.app, app?.app_version]);
+
   const shots = app ? orderedScreenshots(app) : [];
 
   useEffect(() => {
     if (!zoom) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setZoom(false);
-      else if (e.key === "ArrowRight" && shots.length > 1)
-        setShot((i) => (i + 1) % shots.length);
-      else if (e.key === "ArrowLeft" && shots.length > 1)
-        setShot((i) => (i - 1 + shots.length) % shots.length);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setZoom(false);
+      else if (event.key === "ArrowRight" && shots.length > 1)
+        setShot((index) => (index + 1) % shots.length);
+      else if (event.key === "ArrowLeft" && shots.length > 1)
+        setShot((index) => (index - 1 + shots.length) % shots.length);
     };
     document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    lightboxCloseRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = previousOverflow;
+      zoomTriggerRef.current?.focus();
     };
   }, [zoom, shots.length]);
 
@@ -99,127 +136,148 @@ export function AppDetail() {
   }
 
   const name = pick(locale, app.display_name);
-  const desc = pick(locale, app.description);
+  const description = pick(locale, app.description);
   const recent = versions.slice(0, 4);
-  const verifiedRecord =
-    versions.find((v) => v.current.app_version === app.app_version) ?? versions[0];
-  const deployOptions = verifiedDeployOptions(
-    verifiedRecord?.current ?? app,
-    verifiedRecord?.manifest.container.digest
+  const latestRecord =
+    versions.find((record) => record.current.app_version === app.app_version) ?? versions[0];
+  const deployableVersions = versions.filter((record) =>
+    Boolean(verifiedDeployOptions(record.current, record.manifest.container.digest))
   );
+  const selectedRecord =
+    deployableVersions.find((record) => record.current.app_version === selectedVersion) ??
+    latestRecord;
+  const selectedCurrent = selectedRecord?.current ?? app;
+  const verifiedDefault = verifiedDeployOptions(
+    selectedCurrent,
+    selectedRecord?.manifest.container.digest
+  );
+  const instanceOptions = verifiedDefault
+    ? selectableInstanceTypes(verifiedDefault.instanceType)
+    : [selectedCurrent.deploy.instance_type];
+  const dataVolumeOptions = verifiedDefault
+    ? selectableDataVolumes(verifiedDefault.dataVolumeGb)
+    : selectedCurrent.deploy.data_volume_gb
+      ? [selectedCurrent.deploy.data_volume_gb]
+      : [];
+  const isVerifiedDefault = Boolean(
+    verifiedDefault &&
+      selectedRegion === verifiedDefault.region &&
+      selectedInstance === verifiedDefault.instanceType &&
+      selectedDataVolume === verifiedDefault.dataVolumeGb
+  );
+  const deployOptions = verifiedDefault
+    ? {
+        ...verifiedDefault,
+        region: selectedRegion,
+        instanceType: selectedInstance,
+        dataVolumeGb: selectedDataVolume,
+      }
+    : null;
+  const cost = isVerifiedDefault ? selectedCurrent.deploy.cost_estimate : undefined;
+  const sourceRepo = latestRecord?.manifest.release.source_repo;
+  const sourceRepoUrl = sourceRepo ? `https://github.com/${sourceRepo}` : "";
+  const faqItems = appFaq(selectedCurrent);
 
-  // Deploy on AWS：深链 templateURL 直接指向 Repo C 发布的公开 S3 模板
-  // （CFN 控制台原生支持该直链，一点即进创建向导），版本参数拼在深链上。
-  // 镜像按最新已验证记录的 digest 钉住（tag@digest），部署内容与验证内容字节一致。
+  const scrollTo = (id: string) => {
+    const element = sectionRefs.current[id];
+    if (!element) return;
+    const offset = parseFloat(getComputedStyle(element).scrollMarginTop);
+    const top = Math.max(0, Math.min(
+      window.scrollY + element.getBoundingClientRect().top - offset,
+      document.documentElement.scrollHeight - window.innerHeight
+    ));
+    // Short pages cannot align every section with the sticky navigation.
+    navigatingRef.current = Math.abs(window.scrollY - top) > 1;
+    setActiveTab(id);
+    window.scrollTo({ top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  };
+
+  const selectVersion = (version: string) => {
+    const record = deployableVersions.find((item) => item.current.app_version === version);
+    const next = record
+      ? verifiedDeployOptions(record.current, record.manifest.container.digest)
+      : null;
+    setSelectedVersion(version);
+    setDeployMsg("");
+    if (next) {
+      setSelectedRegion(next.region);
+      setSelectedInstance(next.instanceType);
+      setSelectedDataVolume(next.dataVolumeGb);
+    }
+  };
+
   const generateDeploy = () => {
     if (!deployOptions) {
       setDeployMsg(t("deploy_contract_missing"));
-      return null;
+      return;
     }
-    const url = buildDeployUrl(deployOptions);
-    window.open(url, "_blank", "noopener");
-    return url;
+    window.open(buildDeployUrl(deployOptions), "_blank", "noopener");
+    setDeployMsg(t("template_console_hint"));
   };
-
-  const scrollTo = (id: string) => {
-    sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  // Every row below is a Manifest field verbatim (deployment-contract §3 / §3.2).
-  // The cost row only appears when cost_estimate was registered (rule 18) — the
-  // number is a fact, never computed from instance type / disk size.
-  const infoRows: { label: string; value: ReactNode; mono?: boolean; highlight?: boolean }[] = [
-    { label: t("latest_version"), value: app.app_version },
-    { label: t("verified"), value: <TimeAgo iso={app.verified_at} />, highlight: true },
-    { label: "Docker Image", value: app.deploy.docker_image, mono: true },
-    { label: t("supported_architectures"), value: app.architecture },
-    { label: t("aws_regions"), value: app.deploy.regions.join(", ") },
-    { label: "Instance", value: app.deploy.instance_type },
-    ...(app.deploy.data_volume_gb
-      ? [{ label: t("data_volume_label"), value: `${app.deploy.data_volume_gb} GB` }]
-      : []),
-    ...(deployOptions && app.deploy.cost_estimate
-      ? [
-          {
-            label: t("est_cost"),
-            value: t("est_cost_value", { usd: app.deploy.cost_estimate.monthly_usd }),
-            highlight: true,
-          },
-        ]
-      : []),
-    {
-      label: t("stars"),
-      value: stars != null ? stars.toLocaleString() : "—",
-    },
-  ];
 
   return (
-    <section className="section section--compact-top">
+    <section className="section section--compact-top app-detail-page">
       <div className="container">
-        {/* breadcrumb */}
-        <nav className="breadcrumb">
-          <a href={l("/")}>
-            {t("home")}
-          </a>
+        <nav className="breadcrumb" aria-label={t("breadcrumb_label")}>
+          <a href={l("/")}>{t("home")}</a>
           <span className="sep">›</span>
-          <a href={l("/apps")}>
-            {t("software")}
-          </a>
+          <a href={l("/apps")}>{t("software")}</a>
           <span className="sep">›</span>
           <span className="cur">{name}</span>
         </nav>
 
-        {/* header */}
-        <div className="detail-header">
+        <header className="detail-header">
           <div className="detail-main">
             <div className="detail-title-wrap">
-              <IconAvatar
-                name={name}
-                app={app.app}
-                icon={app.icon}
-                size={72}
-              />
+              <IconAvatar name={name} app={app.app} icon={app.icon} size={72} />
               <div>
-                <h1 className="detail-title">
-                  {name} <VerifiedBadge />
-                </h1>
-                <p className="detail-desc detail-desc--flush">
-                  {desc}
-                </p>
+                <h1 className="detail-title">{name}</h1>
+                <p className="detail-desc detail-desc--flush">{description}</p>
               </div>
             </div>
+
             <div className="prop-tags">
               {app.tags.map((tag) => (
-                <span key={tag} className="prop-tag prop-tag--light">
-                  {tag}
-                </span>
+                <span key={tag} className="prop-tag prop-tag--light">{tag}</span>
               ))}
             </div>
-            <div className="detail-actions">
-              <button
-                className="btn btn--primary"
-                onClick={() => {
-                  scrollTo("deployment");
-                  setDeployMsg(t("deploy_hint"));
-                }}
-              >
-                {deployOptions ? t("deploy_now") : t("view_deployment")} <ArrowRightIcon size={16} />
-              </button>
-              <a className="btn btn--ghost" href={app.deploy.documentation_url} target="_blank" rel="noreferrer">
-                {t("view_documentation")} <ExternalLinkIcon size={16} />
+
+            <div className="detail-project-links">
+              <span><StarIcon size={15} /> {stars != null ? stars.toLocaleString() : "—"} GitHub Stars</span>
+              <a href={app.deploy.documentation_url} target="_blank" rel="noreferrer">
+                {t("official_documentation")} <ExternalLinkIcon size={14} />
               </a>
+              {sourceRepoUrl && (
+                <a href={sourceRepoUrl} target="_blank" rel="noreferrer">
+                  <GitCommitIcon size={15} /> {t("source_repository")}
+                </a>
+              )}
             </div>
-            {deployMsg && (
-              <p className="deploy-msg">{deployMsg}</p>
-            )}
+
+            <div className="detail-actions">
+              <button className="btn btn--primary" onClick={() => scrollTo("deployment")}>
+                <RocketIcon size={16} /> {deployOptions ? t("configure_deployment") : t("view_deployment")}
+                <ArrowRightIcon size={16} />
+              </button>
+            </div>
+
+            <p className="detail-deploy-meta">
+              {cost && (
+                <>
+                  {t("est_cost_value", { usd: cost.monthly_usd })}
+                  <span aria-hidden>·</span>
+                </>
+              )}
+              {t("about_ten_minutes")} <span aria-hidden>·</span> {t("resources_in_your_account")}
+            </p>
           </div>
 
-          {/* screenshot: mirrored at build time, ordered by screenshots_order */}
           <div className="detail-side">
             <div className="device-mockup">
               <div className="device-mockup__screen">
                 {shots[shot] ? (
                   <button
+                    ref={zoomTriggerRef}
                     type="button"
                     className="shot-zoom"
                     onClick={() => setZoom(true)}
@@ -229,17 +287,12 @@ export function AppDetail() {
                     <img
                       src={shots[shot].siteUrl}
                       alt={pick(locale, shots[shot].caption)}
-                      loading="lazy"
+                      loading={shot === 0 ? "eager" : "lazy"}
                     />
                   </button>
                 ) : (
                   <div className="mock-ui">
-                    <div className="mock-ui__side">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
+                    <div className="mock-ui__side"><span /><span /><span /><span /></div>
                     <div className="mock-ui__main">
                       <div className="mock-ui__row" />
                       <div className="mock-ui__row mock-ui__row--short" />
@@ -249,296 +302,265 @@ export function AppDetail() {
                 )}
               </div>
             </div>
+            {shots.length > 0 && (
+              <p className="detail-screenshot-caption">
+                {t("verification_screenshot")} <span>· {t("zoom_hint")}</span>
+              </p>
+            )}
             {shots.length > 1 && (
               <div className="shot-dots">
-                {shots.map((s, i) => (
+                {shots.map((screenshot, index) => (
                   <button
-                    key={s.scenario}
-                    className={`shot-dot ${i === shot ? "is-active" : ""}`}
-                    onClick={() => setShot(i)}
-                    aria-label={pick(locale, s.caption)}
+                    key={screenshot.scenario}
+                    className={`shot-dot ${index === shot ? "is-active" : ""}`}
+                    onClick={() => setShot(index)}
+                    aria-label={pick(locale, screenshot.caption)}
                   />
                 ))}
               </div>
             )}
           </div>
+        </header>
+
+        <div className="detail-verification">
+          <ShieldCheckIcon size={20} />
+          <div className="detail-verification__body">
+            <span>
+              <strong>{app.app_version}</strong> · {t("verification_completed")} <TimeAgo iso={app.verified_at} />
+            </span>
+            {latestRecord?.manifest.verification.platform === "referenced" && (
+              <p>{t("verification_scope_referenced")}</p>
+            )}
+          </div>
+          {app.report_url && (
+            <a href={app.report_url} target="_blank" rel="noreferrer">
+              {t("view_report")} <ArrowRightIcon size={14} />
+            </a>
+          )}
         </div>
 
-        {/* tabs */}
-        <div className="tabs">
+        <nav className="tabs" aria-label={t("detail_sections")}>
           {TABS.map((id) => (
             <a
               key={id}
               className={`tabs__item ${activeTab === id ? "is-active" : ""}`}
+              aria-current={activeTab === id ? "location" : undefined}
               href={`#${id}`}
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={(event) => {
+                event.preventDefault();
                 scrollTo(id);
               }}
             >
-              {t(id)}
+              {t(id === "configuration" ? "technical_information" : id)}
             </a>
           ))}
-        </div>
+        </nav>
 
-        <div className="detail-layout">
-          {/* overview */}
-          <div
-            className="detail-section detail-section--plain"
-            id="overview"
-            ref={(el) => (sectionRefs.current["overview"] = el)}
+        <div className="detail-flow">
+          <section
+            className="detail-section detail-section--deployment"
+            id="deployment"
+            ref={(element) => { sectionRefs.current.deployment = element; }}
+            aria-label={t("quick_deploy")}
           >
-            <p>{desc}</p>
-              {app.features.length > 0 && (
-                <ul className="feature-list">
-                  {app.features.map((f, i) => (
-                    <li key={i}>
-                      <CheckCircleIcon size={18} />
-                      {pick(locale, f)}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {deployOptions && <DeployQuickRef app={app} />}
-          </div>
+            <div className="section__head detail-section__heading">
+              <h2 className="heading--flush">{t("quick_deploy")}</h2>
+              {deployOptions && <p>{t("choose_deployment_configuration")}</p>}
+            </div>
 
-          {/* right sidebar */}
-          <aside className="side-panel">
-            <div className="info-card-list">
-              {infoRows.map((row) => (
-                <div className="info-card info-card--row" key={row.label}>
-                  <span className="info-card__label">{row.label}</span>
-                  <span
-                    className={`info-card__value ${row.highlight ? "info-card__value--highlight" : ""} ${row.mono ? "mono" : ""}`}
-                  >
-                    {row.highlight && <CheckCircleIcon size={14} />}
-                    {row.value}
-                  </span>
+            <div className="deploy-configurator deploy-configurator--inline">
+              <div className="deploy-configurator__head">
+                <div className="deploy-configurator__title">
+                  <h3>{t(!deployOptions ? "needs_reverification" : isVerifiedDefault ? "recommended_configuration" : "custom_configuration")}</h3>
                 </div>
+                <div className="deploy-configurator__cost">
+                  <span>{deployOptions ? t("estimated_cost") : t("latest_version")}</span>
+                  <strong>{deployOptions ? (cost ? t("est_cost_value", { usd: cost.monthly_usd }) : t("cost_shown_in_aws")) : selectedCurrent.app_version}</strong>
+                </div>
+              </div>
+
+              {deployOptions && (
+                <>
+                  <dl className="deployment-summary">
+                    <div><dt>{t("deployment_version")}</dt><dd>{selectedCurrent.app_version}</dd></div>
+                    <div><dt>{t("aws_regions")}</dt><dd>{selectedRegion}</dd></div>
+                    <div><dt>{t("instance_label")}</dt><dd>{selectedInstance}</dd></div>
+                    <div><dt>{t("data_volume_label")}</dt><dd>{selectedDataVolume} GB</dd></div>
+                  </dl>
+
+                  <details className="deployment-customize">
+                    <summary>
+                      <span>{t("customize_configuration")}</span>
+                      <ChevronRightIcon size={16} />
+                    </summary>
+                    <p className="deployment-customize__hint">{t("customize_configuration_hint")}</p>
+                    <div className="deploy-configurator__fields">
+                      <label className="config-select">
+                        <span>{t("deployment_version")}</span>
+                        <span className="config-select__control">
+                          <select
+                            value={selectedCurrent.app_version}
+                            onChange={(event) => selectVersion(event.target.value)}
+                            disabled={deployableVersions.length <= 1}
+                          >
+                            {deployableVersions.map((record) => (
+                              <option key={record.current.app_version} value={record.current.app_version}>
+                                {record.current.app_version}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDownIcon size={15} />
+                        </span>
+                      </label>
+
+                      <label className="config-select">
+                        <span>{t("aws_regions")}</span>
+                        <span className="config-select__control">
+                          <select value={selectedRegion} onChange={(event) => { setSelectedRegion(event.target.value); setDeployMsg(""); }} disabled={selectedCurrent.deploy.regions.length <= 1}>
+                            {selectedCurrent.deploy.regions.map((region) => (
+                              <option key={region} value={region}>{region}</option>
+                            ))}
+                          </select>
+                          <ChevronDownIcon size={15} />
+                        </span>
+                      </label>
+
+                      <label className="config-select">
+                        <span>{t("instance_label")}</span>
+                        <span className="config-select__control">
+                          <select value={selectedInstance} onChange={(event) => { setSelectedInstance(event.target.value); setDeployMsg(""); }} disabled={instanceOptions.length <= 1}>
+                            {instanceOptions.map((instance) => (
+                              <option key={instance} value={instance}>
+                                {instance}{instance === verifiedDefault?.instanceType ? ` · ${t("recommended")}` : ""}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDownIcon size={15} />
+                        </span>
+                      </label>
+
+                      <label className="config-select">
+                        <span>{t("data_volume_label")}</span>
+                        <span className="config-select__control">
+                          <select value={selectedDataVolume} onChange={(event) => { setSelectedDataVolume(Number(event.target.value)); setDeployMsg(""); }} disabled={dataVolumeOptions.length <= 1}>
+                            {dataVolumeOptions.map((size) => (
+                              <option key={size} value={size}>{size} GB</option>
+                            ))}
+                          </select>
+                          <ChevronDownIcon size={15} />
+                        </span>
+                      </label>
+                    </div>
+                    {!isVerifiedDefault && (
+                      <button className="btn btn--ghost btn--sm deployment-reset" onClick={() => selectVersion(selectedCurrent.app_version)}>
+                        {t("restore_recommended_configuration")}
+                      </button>
+                    )}
+                  </details>
+                </>
+              )}
+
+              <div className="deploy-configurator__footer">
+                <div className={`deploy-configurator__status ${!deployOptions ? "is-unavailable" : isVerifiedDefault ? "is-verified" : "is-custom"}`}>
+                  <span>
+                    {isVerifiedDefault ? <CheckCircleIcon size={17} /> : <ShieldCheckIcon size={17} />}
+                    {!deployOptions
+                      ? t("deploy_contract_missing")
+                      : isVerifiedDefault
+                        ? t("verified_configuration_status")
+                        : t("custom_configuration_status")}
+                  </span>
+                  <a href="#configuration" onClick={(event) => { event.preventDefault(); scrollTo("configuration"); }}>
+                    {t("technical_details")} <ArrowRightIcon size={13} />
+                  </a>
+                </div>
+
+                <div className="deploy-configurator__action">
+                  <button className="btn btn--primary" disabled={!deployOptions} onClick={generateDeploy}>
+                    <RocketIcon size={16} /> {t("deploy_to_aws")} <ArrowRightIcon size={15} />
+                  </button>
+                  <small>{t("opens_cloudformation_in_your_account")}</small>
+                </div>
+              </div>
+
+              {deployMsg && <p className="deploy-configurator__message">{deployMsg}</p>}
+
+              {deployOptions && (
+                <details className="deployment-disclosure">
+                  <summary>
+                    <span><PackageIcon size={17} /> {t("deployment_and_post_deploy")}</span>
+                    <ChevronRightIcon size={17} />
+                  </summary>
+                  <DeployGuide app={selectedCurrent} />
+                </details>
+              )}
+            </div>
+          </section>
+
+          <section
+            className="detail-section"
+            id="versions"
+            ref={(element) => { sectionRefs.current.versions = element; }}
+          >
+            <div className="section__head">
+              <h2 className="heading--flush">{t("versions")}</h2>
+              <a className="section__link" href={l(`/apps/${app.app}/versions/`)}>
+                {t("view_full_history")} <ArrowRightIcon size={14} />
+              </a>
+            </div>
+            <VersionTable versions={recent} locale={locale} />
+          </section>
+
+          <section
+            className="detail-section"
+            id="configuration"
+            ref={(element) => { sectionRefs.current.configuration = element; }}
+          >
+            <h2>{t("technical_information")}</h2>
+            <div className="technical-grid">
+              <TechnicalCell icon={<PackageIcon size={20} />} label={t("container_port")} value={String(selectedCurrent.deploy.container_port)} copyLabel={t("copy_value")} copiedLabel={t("copied")} />
+              <TechnicalCell icon={<CpuIcon size={20} />} label={t("supported_architectures")} value={selectedCurrent.architecture} copyLabel={t("copy_value")} copiedLabel={t("copied")} />
+              <TechnicalCell icon={<HardDriveIcon size={20} />} label="AMI" value={selectedCurrent.ami_id} copyLabel={t("copy_value")} copiedLabel={t("copied")} mono />
+              <TechnicalCell icon={<PackageIcon size={20} />} label={t("docker_image")} value={selectedCurrent.deploy.docker_image} copyLabel={t("copy_value")} copiedLabel={t("copied")} mono />
+            </div>
+          </section>
+
+          <section
+            className="detail-section detail-section--faq"
+            id="faq"
+            ref={(element) => { sectionRefs.current.faq = element; }}
+          >
+            <h2>{t("faq")}</h2>
+            <div className="faq-list">
+              {faqItems.map((item) => (
+                <details className="faq-item" key={item.question.en}>
+                  <summary>
+                    <span>{pick(locale, item.question)}</span>
+                    <ChevronRightIcon size={17} />
+                  </summary>
+                  <p>{pick(locale, item.answer)}</p>
+                </details>
               ))}
             </div>
-            {/* Provenance links: values come verbatim from current.json. An empty field
-                means Repo C never published it, so no anchor is rendered at all. */}
-            <h3 className="side-panel__title" style={{ marginTop: "var(--space-6)" }}>
-              {t("verification_provenance")}
-            </h3>
-            <div className="info-card-list">
-              <div className="info-card info-card--row">
-                <span className="info-card__label">{t("verification_id")}</span>
-                <span className="info-card__value mono">{app.verification_id}</span>
-              </div>
-              {app.report_url && (
-                <div className="info-card info-card--row">
-                  <span className="info-card__label">{t("report")}</span>
-                  <a className="link-blue" href={app.report_url} target="_blank" rel="noreferrer">
-                    {t("view_report")} <ExternalLinkIcon size={12} />
-                  </a>
-                </div>
-              )}
-              {app.workflow_run_url && (
-                <div className="info-card info-card--row">
-                  <span className="info-card__label">{t("actions_run")}</span>
-                  <a
-                    className="link-blue"
-                    href={app.workflow_run_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    #{app.verification_run_id} <ExternalLinkIcon size={12} />
-                  </a>
-                </div>
-              )}
-            </div>
-          </aside>
+          </section>
         </div>
-
-        {/* deployment */}
-        <div
-          className="detail-section"
-          id="deployment"
-          ref={(el) => (sectionRefs.current["deployment"] = el)}
-        >
-          <div className="quick-deploy">
-                <div className="quick-deploy__title-row">
-                  <h3 className="quick-deploy__title">
-                    {t("quick_deploy")}
-                  </h3>
-                  {/* deploy URL pins the verified digest (buildDeployUrl) — say so
-                      where the user clicks, not only in the guide below */}
-                  <span className="chip">
-                    <LockIcon size={12} /> {t("digest_pin_chip")}
-                  </span>
-                </div>
-                <div className="quick-deploy__row">
-                  <div className="quick-deploy__field">
-                    <label>{t("aws_regions")}</label>
-                    <output className="quick-deploy__verified-value">
-                      {app.deploy.regions[0] || app.region}
-                    </output>
-                  </div>
-                  <div className="quick-deploy__field">
-                    <label>{t("instance_label")}</label>
-                    <output className="quick-deploy__verified-value">
-                      {app.deploy.instance_type}
-                    </output>
-                  </div>
-                  <div className="quick-deploy__field">
-                    <label>{t("data_volume_label")}</label>
-                    <output className="quick-deploy__verified-value">
-                      {app.deploy.data_volume_gb ? `${app.deploy.data_volume_gb} GB` : "—"}
-                    </output>
-                  </div>
-                </div>
-                <div className="quick-deploy__btn">
-                  <button
-                    className="btn btn--primary"
-                    disabled={!deployOptions}
-                    onClick={() => {
-                      if (generateDeploy()) setDeployMsg(t("template_console_hint"));
-                    }}
-                  >
-                    <RocketIcon size={16} /> {t("generate_template")}
-                  </button>
-                </div>
-                {!deployOptions && (
-                  <p className="deploy-msg">{t("deploy_contract_missing")}</p>
-                )}
-                {deployOptions && app.deploy.cost_estimate && (
-                  <p className="quick-deploy__cost">
-                    <strong>{t("est_cost_value", { usd: app.deploy.cost_estimate.monthly_usd })}</strong>
-                    {app.deploy.cost_estimate.note &&
-                      ` — ${pick(locale, app.deploy.cost_estimate.note)}`}
-                  </p>
-                )}
-          </div>
-          {deployOptions && <DeployGuide app={app} />}
-        </div>
-
-        {/* versions */}
-        <div
-          className="detail-section"
-          id="versions"
-          ref={(el) => (sectionRefs.current["versions"] = el)}
-        >
-          <div className="section__head">
-            <h2 className="heading--flush">{t("versions")}</h2>
-            <a className="section__link" href={l(`/apps/${app.app}/versions/`)}>
-              {t("view_full_history")} <ArrowRightIcon size={14} />
-            </a>
-          </div>
-          <VersionTable versions={recent} locale={locale} />
-        </div>
-
-        {/* configuration */}
-            <div
-              className="detail-section"
-              id="configuration"
-              ref={(el) => (sectionRefs.current["configuration"] = el)}
-            >
-              <h2>{t("configuration")}</h2>
-              <div className="info-cards">
-                <div className="info-card">
-                  <p className="info-card__label">Container Port</p>
-                  <p className="info-card__value">{app.deploy.container_port}</p>
-                </div>
-                <div className="info-card">
-                  <p className="info-card__label">{t("aws_regions")}</p>
-                  <p className="info-card__value">{app.deploy.regions.join(", ")}</p>
-                </div>
-                <div className="info-card">
-                  <p className="info-card__label">{t("supported_architectures")}</p>
-                  <p className="info-card__value">{app.architecture}</p>
-                </div>
-                <div className="info-card">
-                  <p className="info-card__label">AMI</p>
-                  <p className="info-card__value mono">{app.ami_id}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* updates */}
-            <div
-              className="detail-section"
-              id="updates"
-              ref={(el) => (sectionRefs.current["updates"] = el)}
-            >
-              <h2>{t("updates_tab")}</h2>
-              <VersionTable versions={recent} locale={locale} compact />
-            </div>
-
-            {/* faq */}
-            <div
-              className="detail-section"
-              id="faq"
-              ref={(el) => (sectionRefs.current["faq"] = el)}
-            >
-              <h2>{t("faq")}</h2>
-              <ul>
-                {APP_FAQ.map((item) => (
-                  <li key={item.en}>{pick(locale, item)}</li>
-                ))}
-              </ul>
-            </div>
       </div>
 
       {zoom && shots[shot] && (
-        <div
-          className="lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label={pick(locale, shots[shot].caption)}
-          onClick={() => setZoom(false)}
-        >
-          <button
-            type="button"
-            className="lightbox__close"
-            onClick={() => setZoom(false)}
-            aria-label={t("close")}
-          >
-            ×
-          </button>
+        <div className="lightbox" role="dialog" aria-modal="true" aria-label={pick(locale, shots[shot].caption)} onClick={() => setZoom(false)}>
+          <button ref={lightboxCloseRef} type="button" className="lightbox__close" onClick={() => setZoom(false)} aria-label={t("close")}>×</button>
           {shots.length > 1 && (
-            <button
-              type="button"
-              className="lightbox__nav lightbox__nav--prev"
-              aria-label={t("prev_screenshot")}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShot((i) => (i - 1 + shots.length) % shots.length);
-              }}
-            >
-              ‹
-            </button>
+            <button type="button" className="lightbox__nav lightbox__nav--prev" aria-label={t("prev_screenshot")} onClick={(event) => { event.stopPropagation(); setShot((index) => (index - 1 + shots.length) % shots.length); }}>‹</button>
           )}
-          <figure className="lightbox__figure" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={shots[shot].siteUrl}
-              alt={pick(locale, shots[shot].caption)}
-              onClick={() =>
-                shots.length > 1 && setShot((i) => (i + 1) % shots.length)
-              }
-            />
+          <figure className="lightbox__figure" onClick={(event) => event.stopPropagation()}>
+            <img src={shots[shot].siteUrl} alt={pick(locale, shots[shot].caption)} onClick={() => shots.length > 1 && setShot((index) => (index + 1) % shots.length)} />
             <figcaption>
               {pick(locale, shots[shot].caption)}
-              {shots.length > 1 && (
-                <span className="lightbox__count">
-                  {shot + 1} / {shots.length}
-                </span>
-              )}
+              {shots.length > 1 && <span className="lightbox__count">{shot + 1} / {shots.length}</span>}
             </figcaption>
           </figure>
           {shots.length > 1 && (
-            <button
-              type="button"
-              className="lightbox__nav lightbox__nav--next"
-              aria-label={t("next_screenshot")}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShot((i) => (i + 1) % shots.length);
-              }}
-            >
-              ›
-            </button>
+            <button type="button" className="lightbox__nav lightbox__nav--next" aria-label={t("next_screenshot")} onClick={(event) => { event.stopPropagation(); setShot((index) => (index + 1) % shots.length); }}>›</button>
           )}
         </div>
       )}
@@ -546,36 +568,41 @@ export function AppDetail() {
   );
 }
 
-function VersionTable({
-  versions,
-  locale,
-  compact,
-}: {
-  versions: AppVersionRecord[];
-  locale: "en" | "zh";
-  compact?: boolean;
+function TechnicalCell({ icon, label, value, copyLabel, copiedLabel, mono }: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  copyLabel: string;
+  copiedLabel: string;
+  mono?: boolean;
 }) {
-  const t = useI18n().t;
-  if (compact) {
-    return (
-      <div className="updates-list">
-        {versions.map(({ manifest, current }) => (
-          <div className="update-row" key={manifest.app_version}>
-            <div className="update-row__body">
-              <div className="update-row__line1">
-                <span className="update-row__ver">{manifest.app_version}</span>
-                <span className="mono">{formatDate(manifest.verified_at, locale)}</span>
-                <span className="badge badge--verified">
-                  <CheckCircleIcon size={12} /> {t("verified")}
-                </span>
-                <ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="technical-cell">
+      <span className="technical-cell__icon">{icon}</span>
+      <span className="technical-cell__body">
+        <span className="technical-cell__label">{label}</span>
+        <span className={`technical-cell__value ${mono ? "mono" : ""}`} title={value}>{value}</span>
+      </span>
+      <button type="button" className="technical-cell__copy" onClick={copy} aria-label={`${copyLabel}: ${label}`} title={copied ? copiedLabel : copyLabel}>
+        {copied ? <CheckCircleIcon size={16} /> : <CopyIcon size={16} />}
+      </button>
+    </div>
+  );
+}
+
+function VersionTable({ versions, locale }: { versions: AppVersionRecord[]; locale: "en" | "zh" }) {
+  const { t } = useI18n();
   return (
     <div className="table-scroll" tabIndex={0}>
       <table className="vtable">
@@ -593,17 +620,9 @@ function VersionTable({
             <tr key={manifest.app_version}>
               <td className="mono">{manifest.app_version}</td>
               <td>{formatDate(manifest.verified_at, locale)}</td>
-              <td>
-                <span className="badge badge--verified">
-                  <CheckCircleIcon size={12} /> {t("verified")}
-                </span>
-              </td>
-              <td>
-                <ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} />
-              </td>
-              <td>
-                <PlatformBadge platform={manifest.verification.platform} />
-              </td>
+              <td><span className="badge badge--verified"><CheckCircleIcon size={12} /> {t("verified")}</span></td>
+              <td><ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} /></td>
+              <td><PlatformBadge platform={manifest.verification.platform} /></td>
             </tr>
           ))}
         </tbody>

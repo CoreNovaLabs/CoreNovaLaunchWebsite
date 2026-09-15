@@ -100,6 +100,12 @@ export const ChevronRightIcon = ({ size, style }: { size?: number; style?: CSSPr
   </Icon>
 );
 
+export const ChevronDownIcon = ({ size, style }: { size?: number; style?: CSSProperties }) => (
+  <Icon size={size} style={style}>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+);
+
 export const ExternalLinkIcon = ({ size, style }: { size?: number; style?: CSSProperties }) => (
   <Icon size={size} style={style}>
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -237,5 +243,12 @@ export const LockIcon = ({ size, style }: { size?: number; style?: CSSProperties
   <Icon size={size} style={style}>
     <rect x="3" y="11" width="18" height="11" rx="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </Icon>
+);
+
+export const CopyIcon = ({ size, style }: { size?: number; style?: CSSProperties }) => (
+  <Icon size={size} style={style}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
   </Icon>
 );
