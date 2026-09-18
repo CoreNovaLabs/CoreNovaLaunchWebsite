@@ -34,6 +34,7 @@ import {
   selectableInstanceTypes,
   verifiedDeployOptions,
 } from "../lib/deploy";
+import { deploymentHold } from "../lib/deploymentSafety";
 import { formatDate } from "../lib/format";
 import { useTitle } from "../lib/hooks";
 
@@ -371,7 +372,11 @@ export function AppDetail() {
             <div className="deploy-configurator deploy-configurator--inline">
               <div className="deploy-configurator__head">
                 <div className="deploy-configurator__title">
-                  <h3>{t(!deployOptions ? "needs_reverification" : isVerifiedDefault ? "recommended_configuration" : "custom_configuration")}</h3>
+                  <h3>{t(
+                                    !deployOptions
+                                      ? deploymentHold(selectedCurrent) ? "deployment_paused" : "needs_reverification"
+                                      : isVerifiedDefault ? "recommended_configuration" : "custom_configuration"
+                                  )}</h3>
                 </div>
                 <div className="deploy-configurator__cost">
                   <span>{deployOptions ? t("estimated_cost") : t("latest_version")}</span>
@@ -620,7 +625,13 @@ function VersionTable({ versions, locale }: { versions: AppVersionRecord[]; loca
             <tr key={manifest.app_version}>
               <td className="mono">{manifest.app_version}</td>
               <td>{formatDate(manifest.verified_at, locale)}</td>
-              <td><span className="badge badge--verified"><CheckCircleIcon size={12} /> {t("verified")}</span></td>
+              <td>
+                {deploymentHold(current) ? (
+                  <span className="badge badge--paused">{t("deployment_paused")}</span>
+                ) : (
+                  <span className="badge badge--verified"><CheckCircleIcon size={12} /> {t("verified")}</span>
+                )}
+              </td>
               <td><ReleaseBadge type={current.release.type} evidence={current.release.type_evidence} /></td>
               <td><PlatformBadge platform={manifest.verification.platform} /></td>
             </tr>

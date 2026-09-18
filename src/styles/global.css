@@ -695,6 +695,10 @@ button {
   background: var(--success-sub);
   color: var(--success);
 }
+.badge--paused {
+  background: var(--error-sub);
+  color: var(--error);
+}
 .badge--new {
   background: var(--brand-sub);
   color: var(--brand);

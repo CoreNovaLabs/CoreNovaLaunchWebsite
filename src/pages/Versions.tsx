@@ -328,10 +328,9 @@ function VersionDetail({ rec }: { rec: AppVersionRecord }) {
               </a>
             </p>
           </div>
-          {/* 标准化部署后指引（与详情页同一数据源/组件，消灭重复文案） */}
-          {verifiedDeployOptions(rec.current, m.container.digest) && (
-            <DeployGuide app={rec.current} />
-          )}
+          {/* 标准化部署后指引（与详情页同一数据源/组件，消灭重复文案）；
+              hold 时组件内渲染暂停原因，部署入口仍由 verifiedDeployOptions 拦截 */}
+          <DeployGuide app={rec.current} />
         </div>
       )}
     </div>

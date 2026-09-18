@@ -77,3 +77,17 @@ test("a user-selected upward resource override is mapped to the deep link", () =
   assert.equal(params.get("param_InstanceType"), "t3.large");
   assert.equal(params.get("param_DataVolumeSize"), "120");
 });
+
+test("contract hold (deploy.hold) blocks the deploy entry even on published data", () => {
+  // “已验证”≠“当前可部署”：hold 由 apps/*.yaml 声明，发布数据携带时必须拦截
+  const held = JSON.parse(JSON.stringify(current));
+  held.deploy.hold = { reason: { en: "paused", zh: "暂停部署" } };
+  assert.equal(verifiedDeployOptions(held, "sha256:abc123"), null);
+});
+
+test("fallback hold table blocks apps paused before the contract field was published", () => {
+  // R2 旧数据还没有 deploy.hold 字段时，构建期兑底表继续拦截，暂停不得静默失效
+  const legacy = JSON.parse(JSON.stringify(current));
+  legacy.app = "gitea";
+  assert.equal(verifiedDeployOptions(legacy, "sha256:abc123"), null);
+});

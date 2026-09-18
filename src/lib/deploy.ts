@@ -1,4 +1,5 @@
 import type { AppCurrent } from "../data/types";
+import { deploymentHold } from "./deploymentSafety.ts";
 
 // one-click 模板的公开分发 URL（deployment-contract.md §2.4）。
 //
@@ -75,6 +76,7 @@ function required(value: string, name: string): string {
 // Old manifests do not contain the complete runtime contract. They must not silently
 // fall back to mutable template defaults while the UI still calls the result "verified".
 export function hasVerifiedRuntimeContract(current: AppCurrent): boolean {
+  if (deploymentHold(current)) return false;
   const d = current.deploy;
   return Boolean(
     current.ami_id &&

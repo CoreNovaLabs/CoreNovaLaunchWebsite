@@ -11,6 +11,7 @@ import {
   selectableInstanceTypes,
   verifiedDeployOptions,
 } from "../src/lib/deploy.ts";
+import { deploymentHold } from "../src/lib/deploymentSafety.ts";
 
 const snapshot = JSON.parse(
   readFileSync(new URL("../src/data/generated.json", import.meta.url), "utf8")
@@ -43,7 +44,7 @@ const copy = {
     configure: "Configure deployment", review: "Review deployment", deploy: "Deploy on AWS",
     documentation: "Official documentation", screenshot: "Screenshot from verification",
     customize: "Customize configuration", recommended: "Recommended configuration",
-    unavailable: "Needs re-verification", costFallback: "Shown in AWS",
+    unavailable: "Needs re-verification", paused: "Deployment paused", costFallback: "Shown in AWS",
     fields: ["Version", "AWS Regions", "Instance", "Persistent data volume"],
     cost: (usd: number) => `≈ $${usd}/mo`,
   },
@@ -52,7 +53,7 @@ const copy = {
     configure: "配置部署", review: "查看部署状态", deploy: "部署到 AWS",
     documentation: "官方文档", screenshot: "验证时截图",
     customize: "自定义配置", recommended: "推荐配置",
-    unavailable: "需要重新验证", costFallback: "以 AWS 为准",
+    unavailable: "需要重新验证", paused: "暂停部署", costFallback: "以 AWS 为准",
     fields: ["部署版本", "AWS 区域", "规格", "持久化数据卷"],
     cost: (usd: number) => `≈ $${usd}/月`,
   },
@@ -94,7 +95,9 @@ for (const app of snapshot.apps.filter((item) => item.health === "passed")) {
       assert.ok(awsButton);
       assert.equal(text(awsButton[2]), c.deploy);
       assert.equal(/\bdisabled(?:=|\s|$)/.test(awsButton[1]), !options);
-      assert.ok(html.includes(`<h3>${options ? c.recommended : c.unavailable}</h3>`));
+      assert.ok(html.includes(`<h3>${
+        options ? c.recommended : deploymentHold(current) ? c.paused : c.unavailable
+      }</h3>`));
       assert.ok(html.includes(`deploy-configurator__status ${options ? "is-verified" : "is-unavailable"}`));
       assert.doesNotMatch(html, /<details\b[^>]*\bopen(?:=|\s|>)/);
       const summary = html.match(/<dl class="deployment-summary">([\s\S]*?)<\/dl>/)?.[1];

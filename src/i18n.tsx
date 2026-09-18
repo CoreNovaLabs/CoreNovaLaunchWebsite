@@ -91,6 +91,7 @@ const en: Dict = {
   verification_scope_referenced:
     "Application tests passed; AWS environment evidence comes from the referenced platform verification.",
   needs_reverification: "Needs re-verification",
+  deployment_paused: "Deployment paused",
   official_documentation: "Official documentation",
   source_repository: "Source repository",
   verification_completed: "Verified",
@@ -314,6 +315,7 @@ const zh: Dict = {
   verification_screenshot: "验证时截图",
   verification_scope_referenced: "应用测试已通过；AWS 环境证据来自引用的平台验证记录。",
   needs_reverification: "需要重新验证",
+  deployment_paused: "暂停部署",
   official_documentation: "官方文档",
   source_repository: "开源仓库",
   verification_completed: "验证于",

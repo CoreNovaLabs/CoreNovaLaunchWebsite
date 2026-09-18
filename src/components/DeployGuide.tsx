@@ -9,6 +9,7 @@ import { useI18n, pick } from "../i18n";
 import { useLocalePath } from "./ui";
 import { stackNameFor } from "../lib/deploy";
 import type { AppCurrent } from "../data/types";
+import { deploymentHold } from "../lib/deploymentSafety";
 
 // OutputKey names are contract constants, not translatable data.
 const OUTPUT_ROWS: { key: string; labelKey: string }[] = [
@@ -26,6 +27,8 @@ function scrollToDeployment(e: MouseEvent<HTMLAnchorElement>) {
 // and the admin entry when the app registered one.
 export function DeployQuickRef({ app }: { app: AppCurrent }) {
   const { locale, t } = useI18n();
+  const hold = deploymentHold(app);
+  if (hold) return <div className="deploy-quickref" role="note">{pick(locale, hold)}</div>;
   const pd = app.deploy.post_deploy;
   return (
     <div className="deploy-quickref">
@@ -60,6 +63,8 @@ export function DeployQuickRef({ app }: { app: AppCurrent }) {
 export function DeployGuide({ app }: { app: AppCurrent }) {
   const { locale, t } = useI18n();
   const l = useLocalePath();
+  const hold = deploymentHold(app);
+  if (hold) return <div className="deploy-guide" role="note">{pick(locale, hold)}</div>;
   const pd = app.deploy.post_deploy;
   return (
     <div className="deploy-guide">

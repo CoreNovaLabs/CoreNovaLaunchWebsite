@@ -108,6 +108,9 @@ export interface Deploy {
   cost_estimate?: CostEstimate;
   data_path?: string;
   app_url_env_name?: string;
+  // 运维性部署暂停（deployment-contract.md §2.5）：独立于验证结果，
+  // “已验证”≠“当前可部署”；存在即拦截所有部署入口并展示原因。
+  hold?: { reason: Localized };
 }
 
 export interface ReleaseInfo {
