@@ -34,7 +34,7 @@ npm run preview
 
 ## 数据来源
 
-官网数据**不手写**，由 Repo C（CoreNovaLaunchVerify）生成：
+官网数据**不手写**，由 Repo C（GitHub 仓名 CoreNovaLaunch，本地目录 CoreNovaLaunchVerify）生成：
 
 | 数据 | 来源 | 说明 |
 |------|------|------|

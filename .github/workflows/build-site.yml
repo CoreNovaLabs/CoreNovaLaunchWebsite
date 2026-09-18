@@ -31,7 +31,7 @@ jobs:
       VERIFIED_BACKEND: r2
       R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
       GITHUB_TOKEN: ${{ github.token }}
-      # success_rate 需要读 Repo C 的 Actions runs；VERIFY_REPO_SLUG 形如 <org>/CoreNovaLaunchVerify
+      # success_rate 需要读 Repo C 的 Actions runs；VERIFY_REPO_SLUG 形如 <org>/CoreNovaLaunch（主仓原名 CoreNovaLaunchVerify）
       VERIFY_REPO_SLUG: ${{ vars.VERIFY_REPO_SLUG }}
       # if 条件里不能用 secrets 上下文（GitHub 会拒绝整个工作流），先映射进 env
       CF_DEPLOY_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

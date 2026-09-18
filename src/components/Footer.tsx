@@ -27,7 +27,7 @@ export function Footer() {
           <div className="footer__col-title">{t("footer_resources")}</div>
           <AppLink to="/docs">{t("footer_docs")}</AppLink>
           <a
-            href="https://github.com/CoreNovaLabs/CoreNovaLaunchVerify"
+            href="https://github.com/CoreNovaLabs/CoreNovaLaunch"
             target="_blank"
             rel="noreferrer"
           >
