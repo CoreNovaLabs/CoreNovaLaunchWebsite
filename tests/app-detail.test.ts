@@ -139,3 +139,37 @@ for (const app of snapshot.apps.filter((item) => item.health === "passed")) {
     });
   }
 }
+
+test("DeployGuide binds the verification evidence to the one-click template revision", async () => {
+  // deployment-contract §2.4：current.json 的 deploy.template 让“这份证据对应的
+  // 模板是哪版”可查。组件级渲染验证：generated.json 旧记录无此字段（可选展示），
+  // 故注入字段直接渲染，锁定展示契约与 revision 短哈希/模板链接的渲染路径。
+  const { createElement } = await import("react");
+  const { renderToString } = await import("react-dom/server");
+  const { DeployGuide } = await server.ssrLoadModule("/src/components/DeployGuide.tsx");
+  const { I18nProvider } = await server.ssrLoadModule("/src/i18n.tsx");
+  const current = {
+    app: "ghost",
+    app_version: "v6.62.0",
+    deploy: {
+      documentation_url: "https://ghost.org/docs/",
+      regions: ["us-east-1"],
+      instance_type: "t3.small",
+      container_port: 2368,
+      data_volume_gb: 30,
+      docker_image: "ghost:6.62.0-alpine",
+      data_path: "/var/lib/ghost/content",
+      health_check_path: "/",
+      template: {
+        url: "https://corenovalaunch-templates.s3.us-east-1.amazonaws.com/corenova-one-click.template.yaml",
+        revision: "f14bc41776ef92827a97184784dc5519b9c576ac",
+      },
+    },
+  } as never;
+  const html = renderToString(
+    createElement(I18nProvider, { locale: "en" }, createElement(DeployGuide, { app: current }))
+  );
+  assert.ok(html.includes("deploy-guide__meta"));
+  assert.ok(html.includes("f14bc41"));
+  assert.ok(html.includes("corenova-one-click.template.yaml"));
+});

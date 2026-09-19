@@ -2823,6 +2823,15 @@ button {
   border-color: #664d03;
   color: #ffda6a;
 }
+/* 证据绑定的模板 revision 小字（deployment-contract §2.4） */
+.deploy-guide__meta {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-weak);
+}
+.deploy-guide__meta code {
+  font-size: var(--fs-caption);
+}
 
 /* ---------------------- streamlined application detail ----------------- */
 .app-detail-page.section {

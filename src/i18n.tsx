@@ -178,6 +178,8 @@ const en: Dict = {
     "Your data lives at %{path} inside the container, on an encrypted EBS volume. Find the instance by its ID in the EC2 console.",
   deploy_guide_next_backup_prefix: "Back up before any changes:",
   deploy_guide_next_backup_link: "Upgrading and backups guide",
+  template_evidence_binding: "Verification evidence is bound to the one-click template revision",
+  template_evidence_link: "View template",
   deploy_guide_next_upgrade_prefix: "To upgrade to a newer verified version:",
   deploy_guide_next_upgrade_link: "Version history",
   deploy_guide_delete_warning:
@@ -397,6 +399,8 @@ const zh: Dict = {
     "数据保存在容器内的 %{path}，位于加密 EBS 卷上。在 EC2 控制台用实例 ID 找到它。",
   deploy_guide_next_backup_prefix: "变更前先备份：",
   deploy_guide_next_backup_link: "升级与备份指南",
+  template_evidence_binding: "验证证据绑定一键部署模板 revision",
+  template_evidence_link: "查看模板",
   deploy_guide_next_upgrade_prefix: "升级到更新的已验证版本：",
   deploy_guide_next_upgrade_link: "版本历史",
   deploy_guide_delete_warning: "删除 CloudFormation 栈会终止主机，但数据卷会被保留并继续计费。请先创建快照；确认不再需要后，再手动删除保留卷。",

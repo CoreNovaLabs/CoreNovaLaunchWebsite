@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildDeployUrl,
+  ONE_CLICK_TEMPLATE_URL,
   selectableDataVolumes,
   selectableInstanceTypes,
   stackNameFor,
@@ -90,4 +91,13 @@ test("fallback hold table blocks apps paused before the contract field was publi
   const legacy = JSON.parse(JSON.stringify(current));
   legacy.app = "gitea";
   assert.equal(verifiedDeployOptions(legacy, "sha256:abc123"), null);
+});
+
+test("deep link templateURL stays pinned to the published one-click template object", () => {
+  // deployment-contract §2.4：站点不自托管模板副本，深链必须指向发布桶的同一对象；
+  // 验证证据的 deploy.template.revision 也由同一份合并输出计算（corenova/usertemplate）。
+  assert.match(
+    ONE_CLICK_TEMPLATE_URL,
+    /^https:\/\/[a-z0-9-]+\.s3\.us-east-1\.amazonaws\.com\/corenova-one-click\.template\.yaml$/,
+  );
 });

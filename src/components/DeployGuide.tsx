@@ -124,6 +124,19 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
         </ul>
         <p className="deploy-guide__warning">{t("deploy_guide_delete_warning")}</p>
       </div>
+      {app.deploy.template?.revision && (
+        <p className="deploy-guide__meta">
+          {t("template_evidence_binding")} <code>{app.deploy.template.revision.slice(0, 7)}</code>
+          {app.deploy.template.url && (
+            <>
+              {" · "}
+              <a href={app.deploy.template.url} target="_blank" rel="noreferrer" className="link-blue">
+                {t("template_evidence_link")}
+              </a>
+            </>
+          )}
+        </p>
+      )}
     </div>
   );
 }

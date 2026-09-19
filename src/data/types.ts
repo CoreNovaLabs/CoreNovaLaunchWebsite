@@ -104,6 +104,9 @@ export interface Deploy {
   health_check_path?: string;
   docker_image: string;
   extra_environment?: string[];
+  // 验证证据绑定的用户模板（deployment-contract.md §2.4）：内容 SHA 让
+  // “这份证据对应的模板是哪版”可查，而不是靠发布时间戳猜。
+  template?: { url?: string; revision?: string };
   post_deploy?: PostDeploy;
   cost_estimate?: CostEstimate;
   data_path?: string;
