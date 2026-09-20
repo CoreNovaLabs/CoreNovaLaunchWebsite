@@ -148,6 +148,7 @@ export function AppDetail() {
     deployableVersions.find((record) => record.current.app_version === selectedVersion) ??
     latestRecord;
   const selectedCurrent = selectedRecord?.current ?? app;
+  const selectedHold = deploymentHold(selectedCurrent);
   const verifiedDefault = verifiedDeployOptions(
     selectedCurrent,
     selectedRecord?.manifest.container.digest
@@ -374,7 +375,7 @@ export function AppDetail() {
                 <div className="deploy-configurator__title">
                   <h3>{t(
                                     !deployOptions
-                                      ? deploymentHold(selectedCurrent) ? "deployment_paused" : "needs_reverification"
+                                      ? selectedHold ? "deployment_paused" : "needs_reverification"
                                       : isVerifiedDefault ? "recommended_configuration" : "custom_configuration"
                                   )}</h3>
                 </div>
@@ -470,7 +471,9 @@ export function AppDetail() {
                   <span>
                     {isVerifiedDefault ? <CheckCircleIcon size={17} /> : <ShieldCheckIcon size={17} />}
                     {!deployOptions
-                      ? t("deploy_contract_missing")
+                      ? selectedHold
+                        ? pick(locale, selectedHold)
+                        : t("deploy_contract_missing")
                       : isVerifiedDefault
                         ? t("verified_configuration_status")
                         : t("custom_configuration_status")}

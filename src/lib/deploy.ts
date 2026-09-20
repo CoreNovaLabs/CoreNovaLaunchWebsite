@@ -27,6 +27,10 @@ export interface DeployOptions {
   healthCheckPath: string;
   appUrlEnvName?: string;
   extraEnvironment?: string[];
+  // L1.5 生产核对（deployment-contract.md §2.6）通过时声明的保护参数；
+  // 深链必须原样携带，否则部署形态退回核对前的未保护基线。
+  adminAuthEnabled?: boolean;
+  hostMetricsAccess?: boolean;
 }
 
 // User-selectable resource overrides. The verified Manifest remains the source of
@@ -95,6 +99,7 @@ export function verifiedDeployOptions(
   if (!digest || !hasVerifiedRuntimeContract(current)) {
     return null;
   }
+  const checks = new Set(d.production_contract?.checks ?? []);
   return {
     app: current.app,
     appVersion: current.app_version,
@@ -109,6 +114,8 @@ export function verifiedDeployOptions(
     healthCheckPath: d.health_check_path!,
     appUrlEnvName: d.app_url_env_name,
     extraEnvironment: d.extra_environment,
+    adminAuthEnabled: checks.has("admin_auth"),
+    hostMetricsAccess: checks.has("host_metrics"),
   };
 }
 
@@ -143,6 +150,12 @@ export function buildDeployUrl(o: DeployOptions): string {
   const extra = o.extraEnvironment ?? [];
   if (extra.length > 0) {
     url += `&param_ExtraEnvironment=${encodeURIComponent(extra.join("\n"))}`;
+  }
+  if (o.adminAuthEnabled) {
+    url += "&param_AdminAuthEnabled=true";
+  }
+  if (o.hostMetricsAccess) {
+    url += "&param_HostMetricsAccess=true";
   }
   return url;
 }

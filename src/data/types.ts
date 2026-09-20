@@ -114,6 +114,10 @@ export interface Deploy {
   // 运维性部署暂停（deployment-contract.md §2.5）：独立于验证结果，
   // “已验证”≠“当前可部署”；存在即拦截所有部署入口并展示原因。
   hold?: { reason: Localized };
+  // L1.5 生产核对声明（deployment-contract.md §2.6）：核对项决定深链必须
+  // 携带的保护参数（admin_auth→Basic auth、host_metrics→只读指标挂载），
+  // 防止已按核对解除暂停的应用在部署时退回未保护形态。
+  production_contract?: { checks?: string[] };
 }
 
 export interface ReleaseInfo {

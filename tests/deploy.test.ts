@@ -86,11 +86,30 @@ test("contract hold (deploy.hold) blocks the deploy entry even on published data
   assert.equal(verifiedDeployOptions(held, "sha256:abc123"), null);
 });
 
-test("fallback hold table blocks apps paused before the contract field was published", () => {
-  // R2 旧数据还没有 deploy.hold 字段时，构建期兑底表继续拦截，暂停不得静默失效
-  const legacy = JSON.parse(JSON.stringify(current));
-  legacy.app = "gitea";
-  assert.equal(verifiedDeployOptions(legacy, "sha256:abc123"), null);
+test("migration window closed: blocking comes solely from published deploy.hold", () => {
+  // 兜底表已随 L1.5（deployment-contract §2.6）自动解暂停而清空（2026-09-20）：
+  // 构建期表若残留，会在 Repo C 解除 hold 后继续静默拦截官网。
+  const released = JSON.parse(JSON.stringify(current));
+  released.app = "vikunja";
+  delete released.deploy.hold;
+  assert.ok(verifiedDeployOptions(released, "sha256:abc123"));
+});
+
+test("production contract checks are carried into the deep link parameters", () => {
+  // deployment-contract §2.6：核对通过的应用，深链必须默认开启对应保护，
+  // 否则部署形态退回核对前的未保护基线。
+  const guarded = JSON.parse(JSON.stringify(current));
+  guarded.deploy.production_contract = { checks: ["admin_auth", "host_metrics", "data_dir_write"] };
+  const url = new URL(buildDeployUrl(verifiedDeployOptions(guarded, "sha256:abc123")!));
+  const params = new URLSearchParams(url.hash.split("?")[1]);
+  assert.equal(params.get("param_AdminAuthEnabled"), "true");
+  assert.equal(params.get("param_HostMetricsAccess"), "true");
+
+  // 旧记录无该字段 → 不携带任何新参数（模板默认值即未保护基线，行为不变）。
+  const legacyUrl = new URL(buildDeployUrl(verifiedDeployOptions(current, "sha256:abc123")!));
+  const legacyParams = new URLSearchParams(legacyUrl.hash.split("?")[1]);
+  assert.equal(legacyParams.has("param_AdminAuthEnabled"), false);
+  assert.equal(legacyParams.has("param_HostMetricsAccess"), false);
 });
 
 test("deep link templateURL stays pinned to the published one-click template object", () => {
