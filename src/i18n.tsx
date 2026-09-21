@@ -12,9 +12,9 @@ const en: Dict = {
   docs: "Docs",
   search_placeholder: "Search software...",
   // hero
-  hero_title: "Deploy Verified Open Source Apps to Your AWS",
+  hero_title: "Deploy Open Source Apps on AWS in One Click",
   hero_subtitle:
-    "Choose a version with published verification evidence, then open AWS CloudFormation with its image, AMI and storage settings prefilled in your own account.",
+    "Browse verified open source apps and deploy them to your own AWS account with preconfigured CloudFormation templates. Review versions, configurations and verification results before deploying.",
   browse_software: "Browse Software",
   view_documentation: "View Documentation",
   // sections
@@ -244,9 +244,9 @@ const zh: Dict = {
   pricing: "定价",
   docs: "文档",
   search_placeholder: "搜索软件...",
-  hero_title: "把已验证开源软件部署到你的 AWS",
+  hero_title: "在 AWS 上一键部署开源软件",
   hero_subtitle:
-    "选择有公开验证证据的版本，然后在你自己的账号中打开 AWS CloudFormation；镜像、AMI 与存储配置均按该验证记录预填。",
+    "浏览经过验证的开源软件，通过预配置的 CloudFormation 模板部署到自己的 AWS 账号。部署前可查看版本、配置和验证结果。",
   browse_software: "浏览软件",
   view_documentation: "查看文档",
   featured_software: "精选软件",

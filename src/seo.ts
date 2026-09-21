@@ -55,8 +55,8 @@ function homeRoutes(lang: Locale): PrerenderRoute {
     path: routePath(lang),
     lang,
     title: lang === "zh"
-      ? "把已验证开源软件部署到你的 AWS | CoreNova Launch"
-      : "Deploy Verified Open Source Apps to Your AWS | CoreNova Launch",
+      ? "在 AWS 上一键部署开源软件 | CoreNova Launch"
+      : "Deploy Open Source Apps on AWS | CoreNova Launch",
     description: t(lang, "hero_subtitle"),
     jsonLd: [
       {

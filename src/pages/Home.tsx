@@ -61,8 +61,8 @@ export function Home() {
   const stats = useStats();
   useTitle(
     locale === "zh"
-      ? "把已验证开源软件部署到你的 AWS | CoreNova Launch"
-      : "Deploy Verified Open Source Apps to Your AWS | CoreNova Launch"
+      ? "在 AWS 上一键部署开源软件 | CoreNova Launch"
+      : "Deploy Open Source Apps on AWS | CoreNova Launch"
   );
 
   const featured = apps.filter((a) => a.featured).slice(0, 5);
@@ -78,16 +78,16 @@ export function Home() {
               {locale === "zh" ? (
                 <>
                   <span>
-                    把已验证开源软件
+                    在 <span className="accent">AWS</span> 上
                   </span>
-                  <span>部署到你的 <span className="accent">AWS</span></span>
+                  <span>一键部署开源软件</span>
                 </>
               ) : (
                 <>
-                  <span>Deploy Verified</span>
-                  <span>Open Source Apps</span>
+                  <span>Deploy Open Source</span>{" "}
+                  <span>Apps on <span className="accent">AWS</span></span>{" "}
                   <span>
-                    on <span className="accent">AWS</span>
+                    in One Click
                   </span>
                 </>
               )}
