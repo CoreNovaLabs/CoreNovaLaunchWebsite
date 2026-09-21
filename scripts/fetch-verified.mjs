@@ -31,6 +31,8 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { applyLiveHold } from "./lib/liveHold.mjs";
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const WEBSITE_ROOT = path.resolve(HERE, "..");
 
@@ -372,7 +374,9 @@ async function collectVersions(app, current) {
     // Bound the inline payload: keep only the VERSIONS_PER_APP most recent records per app.
     return [app, list.slice(0, VERSIONS_PER_APP)];
   }));
-  for (const [app, list] of lists) finalByApp.set(app, list);
+  // hold 是实时运维态（§2.5）：版本记录里的快照 hold 一律覆写为 current.json 的
+  // 当前值，暂停拦截覆盖全部版本、解除后证据完整的版本恢复可部署。
+  for (const [app, list] of lists) finalByApp.set(app, applyLiveHold(currents.get(app), list));
 }
 
 // ------------------------------------------------------------------ write data/
