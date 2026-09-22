@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
-import { DeployGuide } from "../components/DeployGuide";
+import { DeployGuide, DeployPreparation } from "../components/DeployGuide";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
@@ -30,6 +30,7 @@ import { orderedScreenshots, useApp, useStars, useVersions } from "../data/useAp
 import { pick, useI18n } from "../i18n";
 import {
   buildDeployUrl,
+  productionCheckLabels,
   selectableDataVolumes,
   selectableInstanceTypes,
   verifiedDeployOptions,
@@ -149,6 +150,7 @@ export function AppDetail() {
     latestRecord;
   const selectedCurrent = selectedRecord?.current ?? app;
   const selectedHold = deploymentHold(selectedCurrent);
+  const productionChecks = productionCheckLabels(app.deploy, t);
   const verifiedDefault = verifiedDeployOptions(
     selectedCurrent,
     selectedRecord?.manifest.container.digest
@@ -333,6 +335,9 @@ export function AppDetail() {
             {latestRecord?.manifest.verification.platform === "referenced" && (
               <p>{t("verification_scope_referenced")}</p>
             )}
+            {productionChecks && (
+              <p>{t("production_check_scope", { checks: productionChecks.join(locale === "zh" ? "、" : ", ") })}</p>
+            )}
           </div>
           {app.report_url && (
             <a href={app.report_url} target="_blank" rel="noreferrer">
@@ -463,6 +468,7 @@ export function AppDetail() {
                       </button>
                     )}
                   </details>
+                  <DeployPreparation app={selectedCurrent} region={selectedRegion} showCost={isVerifiedDefault} />
                 </>
               )}
 

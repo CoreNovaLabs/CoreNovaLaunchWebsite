@@ -91,6 +91,16 @@ export function hasVerifiedRuntimeContract(current: AppCurrent): boolean {
   );
 }
 
+// The scope sentence must only appear for records that really carry a production-check
+// declaration; an absent or empty list means "never checked", which is not a blank label.
+export function productionCheckLabels(
+  deploy: AppCurrent["deploy"],
+  t: (key: string) => string
+): string[] | null {
+  const checks = deploy.production_contract?.checks ?? [];
+  return checks.length > 0 ? checks.map((check) => t(`pc_${check}`)) : null;
+}
+
 export function verifiedDeployOptions(
   current: AppCurrent,
   digest?: string
@@ -143,7 +153,9 @@ export function buildDeployUrl(o: DeployOptions): string {
     `&param_InstanceType=${encodeURIComponent(o.instanceType)}` +
     `&param_DataVolumeSize=${o.dataVolumeGb}` +
     `&param_DataContainerPath=${encodeURIComponent(o.dataContainerPath)}` +
-    `&param_HealthCheckPath=${encodeURIComponent(o.healthCheckPath)}`;
+    `&param_HealthCheckPath=${encodeURIComponent(o.healthCheckPath)}` +
+    `&param_LaunchUrl=${encodeURIComponent("http://localhost:8080")}` +
+    "&param_AllowedWebCidr=127.0.0.1%2F32&param_SelfSignedTls=false";
   if (o.appUrlEnvName) {
     url += `&param_AppUrlEnvironmentName=${encodeURIComponent(o.appUrlEnvName)}`;
   }

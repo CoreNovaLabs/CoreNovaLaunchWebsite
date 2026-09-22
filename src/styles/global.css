@@ -1691,6 +1691,17 @@ button {
 .markdown a {
   color: var(--brand);
 }
+/* 命令块与长参数宽于窄屏容器：滚动而不是把整页撑出横向溢出 */
+.markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-3);
+  background: var(--bg-sub);
+  font-size: var(--fs-sm);
+}
+.markdown code:not(pre code) {
+  overflow-wrap: anywhere;
+}
 
 /* ----------------------------- updates list ----------------------------- */
 .updates-list {
@@ -2690,6 +2701,61 @@ button {
   font-weight: var(--fw-bold);
 }
 
+.deployment-preparation {
+  margin: var(--space-5) 0;
+  padding: var(--space-5);
+  background: var(--bg-sub);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  white-space: normal;
+}
+.deployment-preparation h4 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-base);
+}
+.deployment-preparation p {
+  margin: var(--space-2) 0;
+}
+.deployment-preparation ul {
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+.deployment-preparation__cost {
+  display: grid;
+  gap: var(--space-2);
+}
+.deployment-preparation__cost span,
+.deployment-preparation > p:first-of-type {
+  color: var(--text-weak);
+}
+.deployment-preparation__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-4);
+}
+.version-deploy-preparation {
+  padding: var(--space-5);
+  white-space: normal;
+}
+.deploy-guide__notes p {
+  color: var(--text-weak);
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+}
+.deploy-guide__notes pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-3);
+  background: var(--bg-sub);
+  font-size: var(--fs-sm);
+}
+.deploy-guide > .deploy-guide__detail {
+  margin-bottom: var(--space-5);
+}
 .deploy-guide {
   margin-top: var(--space-6);
   border: 1px solid var(--border);

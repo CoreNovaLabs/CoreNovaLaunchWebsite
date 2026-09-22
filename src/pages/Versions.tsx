@@ -4,10 +4,11 @@ import Markdown from "react-markdown";
 import { useI18n, pick } from "../i18n";
 import { useApp, useVersions } from "../data/useAppData";
 import { VerifiedBadge, ReleaseBadge, PlatformBadge, useLocalePath } from "../components/ui";
-import { DeployGuide } from "../components/DeployGuide";
+import { DeployGuide, DeployPreparation } from "../components/DeployGuide";
 import { CheckCircleIcon } from "../components/Icons";
 import { formatDate } from "../lib/format";
 import { buildDeployUrl, verifiedDeployOptions } from "../lib/deploy";
+import { deploymentHold } from "../lib/deploymentSafety";
 import { useTitle } from "../lib/hooks";
 import { CHECK_ROWS } from "../data/types";
 import type { AppVersionRecord } from "../data/types";
@@ -81,6 +82,7 @@ export function Versions() {
           <tbody>
             {versions.map((rec) => {
               const m = rec.manifest;
+              const hold = deploymentHold(rec.current);
               const deployOptions = verifiedDeployOptions(rec.current, m.container.digest);
               return (
                 <Fragment key={m.app_version}>
@@ -88,7 +90,9 @@ export function Versions() {
                     <td className="mono">{m.app_version}</td>
                     <td>{formatDate(m.verified_at, locale)}</td>
                     <td>
-                      <VerifiedBadge />
+                      {hold ? (
+                        <span className="badge badge--paused" title={pick(locale, hold)}>{t("deployment_paused")}</span>
+                      ) : <VerifiedBadge />}
                     </td>
                     <td>
                       <ReleaseBadge type={m.website.release.type} />
@@ -102,14 +106,11 @@ export function Versions() {
                         <button
                           className="btn btn--primary btn--sm"
                           disabled={!deployOptions}
-                          title={deployOptions ? t("deploy_new_stack_hint") : t("deploy_contract_missing")}
-                          onClick={() => {
-                            if (deployOptions) {
-                              window.open(buildDeployUrl(deployOptions), "_blank", "noopener");
-                            }
-                          }}
+                          title={hold ? pick(locale, hold) : deployOptions ? t("deploy_new_stack_hint") : t("deploy_contract_missing")}
+                          aria-expanded={expanded === m.app_version}
+                          onClick={() => setExpanded(m.app_version)}
                         >
-                          {t("deploy")}
+                          {t("configure_deployment")}
                         </button>
                         <button
                           className="btn btn--ghost btn--sm"
@@ -137,6 +138,15 @@ export function Versions() {
                   {expanded === m.app_version && (
                     <tr>
                       <td colSpan={6} style={{ padding: 0 }}>
+                        {deployOptions && (
+                          <div className="version-deploy-preparation">
+                            <DeployPreparation app={rec.current} region={deployOptions.region} />
+                            <button className="btn btn--primary" onClick={() => window.open(buildDeployUrl(deployOptions), "_blank", "noopener")}>
+                              {t("deploy_to_aws")}
+                            </button>
+                            <p>{t("deploy_new_stack_hint")}</p>
+                          </div>
+                        )}
                         <VersionDetail rec={rec} />
                       </td>
                     </tr>

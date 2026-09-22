@@ -1,9 +1,3 @@
-// Standardized post-deployment guidance (app-schema rule 17 / deployment-contract §3.2).
-//
-// Steps 1–4 are platform-generic and identical for every app; the CloudFormation output
-// keys named here match the one-click template's Outputs (KEEP_OUTPUTS whitelist).
-// Step 5 + notes are per-app data from deploy.post_deploy — records without it render
-// only the generic steps and must never invent admin paths or credential hints.
 import type { MouseEvent } from "react";
 import { useI18n, pick } from "../i18n";
 import { useLocalePath } from "./ui";
@@ -13,10 +7,37 @@ import { deploymentHold } from "../lib/deploymentSafety";
 
 // OutputKey names are contract constants, not translatable data.
 const OUTPUT_ROWS: { key: string; labelKey: string }[] = [
+  { key: "InstanceId", labelKey: "dg_out_instance_id" },
+  { key: "SSMPortForwardCommand", labelKey: "dg_out_ssm_command" },
   { key: "ResolvedLaunchUrl", labelKey: "dg_out_launch_url" },
-  { key: "PublicIp", labelKey: "dg_out_public_ip" },
-  { key: "PublicDnsName", labelKey: "dg_out_public_dns" },
 ];
+
+export function DeployPreparation({ app, region, showCost = true }: { app: AppCurrent; region: string; showCost?: boolean }) {
+  const { locale, t } = useI18n();
+  const l = useLocalePath();
+  const cost = showCost ? app.deploy.cost_estimate : undefined;
+  return (
+    <div className="deployment-preparation">
+      <h4>{t("deploy_prepare_title")}</h4>
+      <p>{t("deploy_prepare_self_check")}</p>
+      <ul>
+        <li>{t("deploy_prepare_account", { region })}</li>
+        <li>{t("deploy_prepare_access")}</li>
+        <li>{t("deploy_prepare_public")}</li>
+      </ul>
+      <p className="deployment-preparation__cost">
+        <strong>{t("est_cost")} · {cost ? t("est_cost_value", { usd: cost.monthly_usd }) : t("cost_shown_in_aws")}</strong>
+        {cost?.note && <span>{pick(locale, cost.note)}</span>}
+        <span>{t("deploy_cost_basis")}</span>
+      </p>
+      <p className="deploy-guide__warning">{t("deploy_guide_delete_warning")}</p>
+      <div className="deployment-preparation__links">
+        <a href={l("/docs/verification/")} className="link-blue">{t("deploy_access_help")}</a>
+        <a href={l("/docs/aws-costs/")} className="link-blue">{t("deploy_cost_cleanup_help")}</a>
+      </div>
+    </div>
+  );
+}
 
 function scrollToDeployment(e: MouseEvent<HTMLAnchorElement>) {
   e.preventDefault();
@@ -69,6 +90,7 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
   return (
     <div className="deploy-guide">
       <h3 className="deploy-guide__title">{t("deploy_guide_title")}</h3>
+      <p className="deploy-guide__detail">{t("deploy_guide_not_status")}</p>
       <ol className="deploy-guide__steps">
         <li>{t("deploy_guide_step1", { stack: stackNameFor(app.app, app.app_version) })}</li>
         <li>{t("deploy_guide_step2")}</li>
@@ -83,7 +105,10 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
             ))}
           </ul>
         </li>
-        <li>{t("deploy_guide_step4")}</li>
+        <li>
+          {t("deploy_guide_step4")}
+          <p className="deploy-guide__detail">{t("deploy_guide_tunnel_help")}</p>
+        </li>
         {pd?.admin_path && (
           <li>
             <strong>{t("deploy_guide_admin_title")}</strong>
@@ -92,7 +117,24 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
             {pd.admin_setup && <p className="deploy-guide__detail">{pick(locale, pd.admin_setup)}</p>}
           </li>
         )}
+        <li>{t("deploy_guide_finish_setup")}</li>
       </ol>
+      <div className="deploy-guide__notes">
+        <h4>{t("deploy_https_title")}</h4>
+        <p>{t("deploy_https_steps")}</p>
+        <pre><code>sudo /opt/corenova/bin/enable-https.sh app.example.com you@example.com --confirm-initialized</code></pre>
+        <p>{t("deploy_https_protection")}</p>
+        <a href={l("/docs/verification/")} className="link-blue">{t("deploy_access_help")}</a>
+      </div>
+      <div className="deploy-guide__notes">
+        <h4>{t("deploy_failure_title")}</h4>
+        <ul>
+          <li>{t("deploy_failure_stack")}</li>
+          <li>{t("deploy_failure_access")}</li>
+          <li>{t("deploy_failure_support")}</li>
+        </ul>
+        <a href={l("/docs/aws-costs/")} className="link-blue">{t("deploy_cost_cleanup_help")}</a>
+      </div>
       {pd?.notes && pd.notes.length > 0 && (
         <div className="deploy-guide__notes">
           <h4>{t("deploy_guide_notes")}</h4>

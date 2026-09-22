@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildDeployUrl,
   ONE_CLICK_TEMPLATE_URL,
+  productionCheckLabels,
   selectableDataVolumes,
   selectableInstanceTypes,
   stackNameFor,
@@ -43,6 +44,9 @@ test("deep link maps every verified runtime field to its CloudFormation paramete
   assert.equal(params.get("param_HealthCheckPath"), "/");
   assert.equal(params.get("param_AppUrlEnvironmentName"), "url");
   assert.equal(params.get("param_ExtraEnvironment"), "database__client=sqlite3");
+  assert.equal(params.get("param_LaunchUrl"), "http://localhost:8080");
+  assert.equal(params.get("param_AllowedWebCidr"), "127.0.0.1/32");
+  assert.equal(params.get("param_SelfSignedTls"), "false");
   assert.equal(params.has("param_DiskGb"), false);
 });
 
@@ -118,5 +122,17 @@ test("deep link templateURL stays pinned to the published one-click template obj
   assert.match(
     ONE_CLICK_TEMPLATE_URL,
     /^https:\/\/[a-z0-9-]+\.s3\.us-east-1\.amazonaws\.com\/corenova-one-click\.template\.yaml$/,
+  );
+});
+
+test("production-check scope line only appears for declared records", () => {
+  // verification-manifest/deployment-contract §2.6：核对声明决定文案；无声明不得声称做过生产核对。
+  const t = (key: string) => ({ pc_url_injection: "地址注入", pc_host_metrics: "宿主机指标" } as Record<string, string>)[key];
+  const declared = { ...current, deploy: { ...current.deploy, production_contract: { checks: ["url_injection", "host_metrics"] } } } as never;
+  assert.deepEqual(productionCheckLabels(declared.deploy, t), ["地址注入", "宿主机指标"]);
+  assert.equal(productionCheckLabels(current.deploy, t), null);
+  assert.equal(
+    productionCheckLabels({ ...current.deploy, production_contract: { checks: [] } } as never, t),
+    null
   );
 });
