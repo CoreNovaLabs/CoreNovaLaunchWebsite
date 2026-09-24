@@ -22,6 +22,22 @@ export function appFaq(app: AppCurrent): AppFaqItem[] {
     },
   };
 
+  if (app.deploy.persistence === "none") {
+    return [
+      access,
+      {
+        question: {
+          en: "How do I save my work, and are there still AWS charges?",
+          zh: "如何保存成果？还会产生 AWS 费用吗？",
+        },
+        answer: {
+          en: "There is no application data disk. Save your work using the app's browser download or export feature and keep a local backup. The server does not persist application data; browser storage is not a backup. The instance and root disk still incur charges. Deleting the stack terminates the host and deletes its default root disk, with no application data disk to retain. Check for other billable resources such as snapshots and logs.",
+          zh: "无应用数据盘。请通过应用的浏览器下载或导出功能保存成果，并保留本地备份。服务器不持久化应用数据，浏览器存储不等于备份。实例和系统盘仍会计费；删栈会终止主机并删除默认系统盘，不存在需要保留的应用数据盘。仍需检查快照、日志等其他计费资源。",
+        },
+      },
+    ];
+  }
+
   if (app.deploy.data_path) {
     return [
       access,

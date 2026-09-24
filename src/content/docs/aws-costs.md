@@ -29,6 +29,8 @@ AWS free plans, credits and eligible services depend on account creation date an
 
 ## Stop, delete stack, and delete volume are different
 
+The data-disk operations below apply only to volume-backed deployments. A record explicitly declaring `deploy.persistence: none` has no application data disk: save work through browser download/export and keep local backups; the server does not persist application data. The instance and root disk still incur charges. Stopping the instance retains the billable root disk; stack deletion terminates the host and deletes its default root disk, with no application data disk to retain. For these deployments, skip data-volume IDs, snapshots and retained-volume deletion in the checklist; still review other billable resources. Do not derive a new price from the volume-backed example above.
+
 | Action | Data and billing consequences |
 |--------|-------------------------------|
 | Stop EC2 | On-demand compute billing stops. Root/data disks and existing snapshots keep billing. An automatically assigned public IPv4 is normally released; separately allocated Elastic IP addresses need attention. |

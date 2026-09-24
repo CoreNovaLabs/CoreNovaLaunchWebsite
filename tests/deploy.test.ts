@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import type { AppCurrent, Deploy } from "../src/data/types.ts";
+import { appFaq } from "../src/data/faq.ts";
 
 import {
   buildDeployUrl,
+  hasVerifiedRuntimeContract,
   ONE_CLICK_TEMPLATE_URL,
   productionCheckLabels,
   selectableDataVolumes,
@@ -27,7 +30,129 @@ const current = {
     app_url_env_name: "url",
     extra_environment: ["database__client=sqlite3"],
   },
-} as never;
+} as AppCurrent;
+
+function statelessCurrent(app = "test-browser-tool"): AppCurrent {
+  const record = structuredClone(current);
+  record.app = app;
+  record.display_name = { en: app, zh: app };
+  record.deploy.persistence = "none";
+  record.deploy.data_volume_gb = 0;
+  delete record.deploy.data_path;
+  return record;
+}
+
+for (const app of ["cyberchef", "drawio", "it-tools", "test-browser-tool"]) {
+  test(`${app}: explicit none produces a zero-volume deep link with an empty path`, () => {
+    const record = statelessCurrent(app);
+    assert.equal(hasVerifiedRuntimeContract(record), true);
+    const options = verifiedDeployOptions(record, "sha256:abc123");
+    assert.ok(options);
+    assert.equal(options.persistence, "none");
+    assert.equal(options.dataVolumeGb, 0);
+    assert.equal(options.dataContainerPath, "");
+    assert.deepEqual(selectableDataVolumes(options.dataVolumeGb), []);
+    const params = new URLSearchParams(new URL(buildDeployUrl(options)).hash.split("?")[1]);
+    assert.equal(params.get("param_PersistenceMode"), "none");
+    assert.equal(params.get("param_DataVolumeSize"), "0");
+    assert.equal(params.has("param_DataContainerPath"), true);
+    assert.equal(params.get("param_DataContainerPath"), "");
+    assert.equal(params.get("param_ImageReference"), "ghost:6.62.0-alpine@sha256:abc123");
+    assert.equal(params.get("param_AmiId"), record.ami_id);
+    assert.equal(params.get("param_HealthCheckPath"), "/");
+  });
+}
+
+test("none rejects missing/nonzero sizes and any declared data path", () => {
+  const conflicts: Partial<Deploy>[] = [
+    { data_volume_gb: undefined }, { data_volume_gb: 8 }, { data_volume_gb: -1 },
+    { data_volume_gb: NaN }, { data_volume_gb: Infinity },
+    { data_path: "/data" }, { data_path: "" }, { data_path: " " },
+  ];
+  for (const conflict of conflicts) {
+    const record = statelessCurrent();
+    Object.assign(record.deploy, conflict);
+    assert.equal(hasVerifiedRuntimeContract(record), false);
+    assert.equal(verifiedDeployOptions(record, "sha256:abc123"), null);
+  }
+});
+
+test("none retains hold, digest, AMI and health-check gates", () => {
+  const record = statelessCurrent();
+  for (const digest of [undefined, "", " "]) {
+    assert.equal(verifiedDeployOptions(record, digest), null);
+  }
+  record.deploy.hold = { reason: { en: "paused", zh: "暂停" } };
+  assert.equal(hasVerifiedRuntimeContract(record), false);
+  assert.equal(verifiedDeployOptions(record, "sha256:abc123"), null);
+  delete record.deploy.hold;
+  for (const field of ["ami", "health"] as const) {
+    const incomplete = structuredClone(record);
+    if (field === "ami") incomplete.ami_id = "";
+    else delete incomplete.deploy.health_check_path;
+    assert.equal(verifiedDeployOptions(incomplete, "sha256:abc123"), null);
+  }
+});
+
+test("deep links reject none conflicts instead of normalizing caller overrides", () => {
+  const options = verifiedDeployOptions(statelessCurrent(), "sha256:abc123")!;
+  for (const dataVolumeGb of [8, -1, NaN, Infinity, undefined]) {
+    assert.throws(() => buildDeployUrl({ ...options, dataVolumeGb } as never), /Conflicting persistence/);
+  }
+  for (const dataContainerPath of ["/data", " ", undefined]) {
+    assert.throws(() => buildDeployUrl({ ...options, dataContainerPath } as never), /Conflicting persistence/);
+  }
+  assert.throws(() => buildDeployUrl({ ...options, digest: "" }), /digest/);
+});
+
+test("missing persistence means volume regardless of app name or app_type", () => {
+  for (const app of ["cyberchef", "drawio", "it-tools"]) {
+    const legacy = statelessCurrent(app);
+    Object.assign(legacy, { app_type: "static" });
+    delete legacy.deploy.persistence;
+    assert.equal(verifiedDeployOptions(legacy, "sha256:abc123"), null);
+    legacy.deploy.data_volume_gb = 30;
+    assert.equal(verifiedDeployOptions(legacy, "sha256:abc123"), null);
+    legacy.deploy.data_path = "/data";
+    assert.equal(verifiedDeployOptions(legacy, "sha256:abc123")?.persistence, "volume");
+  }
+});
+
+test("explicit and legacy volume options preserve size/path requirements and parameters", () => {
+  const record = structuredClone(current);
+  record.deploy.persistence = "volume";
+  const options = verifiedDeployOptions(record, "sha256:abc123")!;
+  for (const persistence of [undefined, "volume"] as const) {
+    const params = new URLSearchParams(new URL(buildDeployUrl({ ...options, persistence })).hash.split("?")[1]);
+    assert.equal(params.get("param_PersistenceMode"), "volume");
+    assert.equal(params.get("param_DataVolumeSize"), "30");
+    assert.equal(params.get("param_DataContainerPath"), record.deploy.data_path);
+    assert.throws(() => buildDeployUrl({ ...options, persistence, dataVolumeGb: 0 }), /dataVolumeGb/);
+    assert.throws(() => buildDeployUrl({ ...options, persistence, dataContainerPath: "" }), /dataContainerPath/);
+  }
+  for (const data_volume_gb of [0, 7, NaN, Infinity]) {
+    record.deploy.data_volume_gb = data_volume_gb;
+    assert.equal(verifiedDeployOptions(record, "sha256:abc123"), null);
+  }
+  const unknown = statelessCurrent();
+  Object.assign(unknown.deploy, { persistence: "unknown" });
+  assert.equal(verifiedDeployOptions(unknown, "sha256:abc123"), null);
+  assert.throws(() => buildDeployUrl({ ...options, persistence: "unknown" } as never), /persistence/);
+});
+
+test("none FAQ describes browser exports, no server persistence and ongoing compute/storage charges", () => {
+  const faq = appFaq(statelessCurrent())[1];
+  assert.match(faq.answer.en, /browser download or export/);
+  assert.match(faq.answer.en, /server does not persist application data/);
+  assert.match(faq.answer.en, /instance and root disk still incur charges/);
+  assert.match(faq.answer.zh, /浏览器下载或导出/);
+  assert.match(faq.answer.zh, /服务器不持久化应用数据/);
+  assert.match(faq.answer.zh, /实例和系统盘仍会计费/);
+  assert.doesNotMatch(faq.answer.en, /encrypted EBS data volume|volume survives stack deletion/);
+  const legacy = structuredClone(current);
+  legacy.display_name = { en: "Ghost", zh: "Ghost" };
+  assert.match(appFaq(legacy)[1].answer.en, /volume survives stack deletion/);
+});
 
 test("deep link maps every verified runtime field to its CloudFormation parameter", () => {
   const options = verifiedDeployOptions(current, "sha256:abc123");

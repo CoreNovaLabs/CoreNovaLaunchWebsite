@@ -158,11 +158,14 @@ export function AppDetail() {
   const instanceOptions = verifiedDefault
     ? selectableInstanceTypes(verifiedDefault.instanceType)
     : [selectedCurrent.deploy.instance_type];
-  const dataVolumeOptions = verifiedDefault
-    ? selectableDataVolumes(verifiedDefault.dataVolumeGb)
-    : selectedCurrent.deploy.data_volume_gb
-      ? [selectedCurrent.deploy.data_volume_gb]
-      : [];
+  const noDataVolume = selectedCurrent.deploy.persistence === "none";
+  const dataVolumeOptions = noDataVolume
+    ? []
+    : verifiedDefault
+      ? selectableDataVolumes(verifiedDefault.dataVolumeGb)
+      : selectedCurrent.deploy.data_volume_gb !== undefined
+        ? [selectedCurrent.deploy.data_volume_gb]
+        : [];
   const isVerifiedDefault = Boolean(
     verifiedDefault &&
       selectedRegion === verifiedDefault.region &&
@@ -396,7 +399,7 @@ export function AppDetail() {
                     <div><dt>{t("deployment_version")}</dt><dd>{selectedCurrent.app_version}</dd></div>
                     <div><dt>{t("aws_regions")}</dt><dd>{selectedRegion}</dd></div>
                     <div><dt>{t("instance_label")}</dt><dd>{selectedInstance}</dd></div>
-                    <div><dt>{t("data_volume_label")}</dt><dd>{selectedDataVolume} GB</dd></div>
+                    <div><dt>{t("data_volume_label")}</dt><dd>{noDataVolume ? t("no_app_data_volume") : `${selectedDataVolume} GB`}</dd></div>
                   </dl>
 
                   <details className="deployment-customize">
@@ -450,17 +453,19 @@ export function AppDetail() {
                         </span>
                       </label>
 
-                      <label className="config-select">
-                        <span>{t("data_volume_label")}</span>
-                        <span className="config-select__control">
-                          <select value={selectedDataVolume} onChange={(event) => { setSelectedDataVolume(Number(event.target.value)); setDeployMsg(""); }} disabled={dataVolumeOptions.length <= 1}>
-                            {dataVolumeOptions.map((size) => (
-                              <option key={size} value={size}>{size} GB</option>
-                            ))}
-                          </select>
-                          <ChevronDownIcon size={15} />
-                        </span>
-                      </label>
+                      {!noDataVolume && (
+                        <label className="config-select">
+                          <span>{t("data_volume_label")}</span>
+                          <span className="config-select__control">
+                            <select value={selectedDataVolume} onChange={(event) => { setSelectedDataVolume(Number(event.target.value)); setDeployMsg(""); }} disabled={dataVolumeOptions.length <= 1}>
+                              {dataVolumeOptions.map((size) => (
+                                <option key={size} value={size}>{size} GB</option>
+                              ))}
+                            </select>
+                            <ChevronDownIcon size={15} />
+                          </span>
+                        </label>
+                      )}
                     </div>
                     {!isVerifiedDefault && (
                       <button className="btn btn--ghost btn--sm deployment-reset" onClick={() => selectVersion(selectedCurrent.app_version)}>

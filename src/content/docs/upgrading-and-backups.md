@@ -4,6 +4,8 @@ Retention is not a backup, and a backup file is not proof of recoverability. Res
 
 ## Data and configuration locations
 
+The data-volume, mount, snapshot and restoration procedures below apply to volume-backed deployments, including legacy records without a persistence field. Only an explicit `deploy.persistence: none` declares no application data disk; never infer this from an app's name or category. For that mode, save work through browser download/export, keep local backups and verify the saved files before upgrading or deleting a stack. The server does not persist application data, and browser storage is not a backup. There is no application data disk to restore or retain after deletion; host settings and proxy credentials still live on the root disk. The instance and root disk still incur charges; review [Costs and resource cleanup](/en/docs/aws-costs/).
+
 | Content | Location and backup boundary |
 |---------|------------------------------|
 | Persistent application data | Host `/var/lib/corenova/app/data` is mounted from the encrypted EBS data volume into the application's declared container path. |

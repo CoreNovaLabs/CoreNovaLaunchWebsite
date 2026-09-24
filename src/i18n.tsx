@@ -60,6 +60,10 @@ const en: Dict = {
   instance_label: "Instance",
   disk_gb_label: "Disk (GB)",
   data_volume_label: "Persistent data volume",
+  no_app_data_volume: "No application data disk",
+  deploy_stateless_data: "Save your work using the app's browser download or export feature and keep a local backup. The server does not persist application data; browser storage is not a backup.",
+  deploy_cost_basis_none: "No application data disk is created, but the instance and root disk still incur charges. Check the region and public IPv4 costs; traffic, snapshots and logs may cost extra. This is not a quote or spending limit; custom configurations need a new estimate.",
+  deploy_delete_warning_none: "Download or export your work before deleting the stack. Deletion terminates the host and deletes its default root disk; there is no application data disk to retain. Check for other billable resources, including any snapshots and logs.",
   version_details: "Version Details",
   application_label: "Application",
   tests_label: "Tests",
@@ -155,7 +159,7 @@ const en: Dict = {
   deploy_hint:
     "Review the verified deployment below, then choose Deploy on AWS. It creates the VPC and host in your own AWS account (about 10 minutes; AWS costs apply).",
   template_console_hint:
-    "Opening AWS CloudFormation with this version's verified image digest, AMI, instance, data volume, data path and health check prefilled. Resources are created in your own account; first boot takes about 5–10 minutes.",
+    "Opening AWS CloudFormation with this version's verified image digest, AMI, instance, persistence settings and health check prefilled. Resources are created in your own account; first boot takes about 5–10 minutes.",
   deploy_contract_missing:
     "This older record is missing required deployment evidence. Deploy is disabled until the version is re-verified with the current contract.",
   download_template: "Download template (YAML)",
@@ -193,7 +197,7 @@ const en: Dict = {
   deploy_failure_title: "If a step fails",
   deploy_failure_stack: "Permissions, rollback or timeout: open CloudFormation Events and locate the first CREATE_FAILED resource. Do not create repeated stacks before inspecting the cause.",
   deploy_failure_access: "Connection refused or access denied: check the SSM session, AWS account/region and local port 8080. For DNS, certificate or administrator errors, stay on the private connection; never work around them by opening public HTTP.",
-  deploy_failure_support: "Share the app/version, region, failed resource and a redacted error. Never share passwords, access keys, session tokens or unredacted logs. Clean failed stacks and inspect retained volumes and snapshots.",
+  deploy_failure_support: "Share the app/version, region, failed resource and a redacted error. Never share passwords, access keys, session tokens or unredacted logs. Clean failed stacks and inspect any remaining billable resources.",
   deploy_guide_admin_title: "Admin console",
   deploy_guide_admin_entry: "Open your access URL followed by this path:",
   deploy_guide_notes: "Good to know",
@@ -316,6 +320,10 @@ const zh: Dict = {
   instance_label: "规格",
   disk_gb_label: "磁盘 (GB)",
   data_volume_label: "持久化数据卷",
+  no_app_data_volume: "无应用数据盘",
+  deploy_stateless_data: "请通过应用的浏览器下载或导出功能保存成果，并保留本地备份。服务器不持久化应用数据，浏览器存储也不等于备份。",
+  deploy_cost_basis_none: "不创建应用数据盘，但实例和系统盘仍会计费。请核对区域及公网 IPv4 费用；流量、快照和日志可能另计。这不是报价或费用上限，修改配置后需重新估算。",
+  deploy_delete_warning_none: "删除栈前请先下载或导出成果。删栈会终止主机并删除默认系统盘，不存在需要保留的应用数据盘；仍需检查其他计费资源，包括已有快照和日志。",
   version_details: "版本详情",
   application_label: "应用验证",
   tests_label: "测试",
@@ -403,7 +411,7 @@ const zh: Dict = {
   deploy_hint:
     "确认下方已验证部署配置后点击「部署到 AWS」——会在你自己的 AWS 账号里创建 VPC 与主机（约 10 分钟，产生 AWS 费用）。",
   template_console_hint:
-    "正在打开 CloudFormation 创建向导；本版本已验证的镜像 digest、AMI、实例规格、数据卷、数据目录和健康检查均已预填。资源创建在你自己的账号中，首次装机约 5–10 分钟。",
+    "正在打开 CloudFormation 创建向导；本版本已验证的镜像 digest、AMI、实例规格、持久化设置和健康检查均已预填。资源创建在你自己的账号中，首次装机约 5–10 分钟。",
   deploy_contract_missing:
     "这条旧验证记录缺少当前部署契约要求的证据；重新验证并发布前已禁用部署，避免用模板默认值冒充已验证配置。",
   download_template: "下载模板（YAML）",
@@ -439,7 +447,7 @@ const zh: Dict = {
   deploy_failure_title: "如果某一步失败",
   deploy_failure_stack: "权限不足、回滚或初始化超时：打开 CloudFormation → Events，找到最早的 CREATE_FAILED 资源及原因；查清前不要重复创建多个栈。",
   deploy_failure_access: "无法连接或访问被拒：核对 SSM 会话、账号、区域及本机 8080 端口。域名、证书或管理员设置出错时，继续用私有通道排查，不要改成公网 HTTP 绕过问题。",
-  deploy_failure_support: "求助时提供应用版本、区域、失败资源名和脱敏错误，不要提供密码、访问密钥、会话令牌或完整原始日志。退出时清理失败栈，并检查保留卷和快照。", 
+  deploy_failure_support: "求助时提供应用版本、区域、失败资源名和脱敏错误，不要提供密码、访问密钥、会话令牌或完整原始日志。退出时清理失败栈，并检查仍在计费的资源。",
   deploy_guide_admin_title: "管理后台",
   deploy_guide_admin_entry: "在访问地址后拼接该路径打开：",
   deploy_guide_notes: "注意事项",

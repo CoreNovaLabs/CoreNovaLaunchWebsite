@@ -99,6 +99,8 @@ export interface Deploy {
   documentation_url: string;
   regions: string[];
   instance_type: string;
+  // Missing persistence means the legacy volume contract, never inferred from app identity.
+  persistence?: "none" | "volume";
   data_volume_gb?: number;
   container_port: number;
   health_check_path?: string;

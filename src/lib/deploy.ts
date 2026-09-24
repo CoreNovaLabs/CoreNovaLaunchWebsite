@@ -22,6 +22,7 @@ export interface DeployOptions {
   region: string;
   amiId: string;
   instanceType: string;
+  persistence?: "none" | "volume";
   dataVolumeGb: number;
   dataContainerPath: string;
   healthCheckPath: string;
@@ -82,13 +83,12 @@ function required(value: string, name: string): string {
 export function hasVerifiedRuntimeContract(current: AppCurrent): boolean {
   if (deploymentHold(current)) return false;
   const d = current.deploy;
-  return Boolean(
-    current.ami_id &&
-    d.data_path &&
-    d.health_check_path &&
-    d.data_volume_gb &&
-    d.data_volume_gb >= 8
-  );
+  const persistence = d.persistence === undefined ? "volume" : d.persistence;
+  const validStorage = persistence === "none"
+    ? d.data_volume_gb === 0 && d.data_path === undefined
+    : persistence === "volume" && Boolean(d.data_path?.trim()) &&
+      Number.isFinite(d.data_volume_gb) && d.data_volume_gb! >= 8;
+  return Boolean(current.ami_id?.trim() && d.health_check_path?.trim() && validStorage);
 }
 
 // The scope sentence must only appear for records that really carry a production-check
@@ -106,9 +106,10 @@ export function verifiedDeployOptions(
   digest?: string
 ): DeployOptions | null {
   const d = current.deploy;
-  if (!digest || !hasVerifiedRuntimeContract(current)) {
+  if (!digest?.trim() || !hasVerifiedRuntimeContract(current)) {
     return null;
   }
+  const persistence = d.persistence ?? "volume";
   const checks = new Set(d.production_contract?.checks ?? []);
   return {
     app: current.app,
@@ -119,8 +120,9 @@ export function verifiedDeployOptions(
     region: d.regions[0] || current.region,
     amiId: current.ami_id,
     instanceType: d.instance_type,
-    dataVolumeGb: d.data_volume_gb!,
-    dataContainerPath: d.data_path!,
+    persistence,
+    dataVolumeGb: persistence === "none" ? 0 : d.data_volume_gb!,
+    dataContainerPath: persistence === "none" ? "" : d.data_path!,
     healthCheckPath: d.health_check_path!,
     appUrlEnvName: d.app_url_env_name,
     extraEnvironment: d.extra_environment,
@@ -136,10 +138,19 @@ export function buildDeployUrl(o: DeployOptions): string {
   required(o.appVersion, "appVersion");
   required(o.amiId, "amiId");
   required(o.digest, "digest");
-  required(o.dataContainerPath, "dataContainerPath");
   required(o.healthCheckPath, "healthCheckPath");
-  if (!Number.isFinite(o.dataVolumeGb) || o.dataVolumeGb < 8) {
-    throw new Error("Missing verified deployment field: dataVolumeGb");
+  const persistence = o.persistence === undefined ? "volume" : o.persistence;
+  if (persistence === "none") {
+    if (o.dataVolumeGb !== 0 || o.dataContainerPath !== "") {
+      throw new Error("Conflicting persistence none fields: dataVolumeGb must be 0 and dataContainerPath must be empty");
+    }
+  } else if (persistence === "volume") {
+    required(o.dataContainerPath, "dataContainerPath");
+    if (!Number.isFinite(o.dataVolumeGb) || o.dataVolumeGb < 8) {
+      throw new Error("Missing verified deployment field: dataVolumeGb");
+    }
+  } else {
+    throw new Error("Unknown verified deployment field: persistence");
   }
   const image = `${required(o.dockerImage, "dockerImage")}@${o.digest}`;
   let url =
@@ -151,6 +162,7 @@ export function buildDeployUrl(o: DeployOptions): string {
     `&param_ContainerPort=${o.containerPort}` +
     `&param_AmiId=${encodeURIComponent(o.amiId)}` +
     `&param_InstanceType=${encodeURIComponent(o.instanceType)}` +
+    `&param_PersistenceMode=${persistence}` +
     `&param_DataVolumeSize=${o.dataVolumeGb}` +
     `&param_DataContainerPath=${encodeURIComponent(o.dataContainerPath)}` +
     `&param_HealthCheckPath=${encodeURIComponent(o.healthCheckPath)}` +

@@ -113,7 +113,8 @@ for (const app of snapshot.apps.filter((item) => item.health === "passed")) {
       assert.ok(customize);
       assert.deepEqual([...summary.matchAll(/<dt>(.*?)<\/dt>/g)].map((match) => text(match[1])), c.fields);
       assert.deepEqual([...summary.matchAll(/<dd>([\s\S]*?)<\/dd>/g)].map((match) => text(match[1])), [
-        options.appVersion, options.region, options.instanceType, `${options.dataVolumeGb} GB`,
+        options.appVersion, options.region, options.instanceType,
+        options.persistence === "none" ? (locale === "en" ? "No application data disk" : "无应用数据盘") : `${options.dataVolumeGb} GB`,
       ]);
       const cost = current.deploy.cost_estimate;
       assert.ok(html.includes(`<strong>${cost ? c.cost(cost.monthly_usd) : c.costFallback}</strong>`));
@@ -128,8 +129,9 @@ for (const app of snapshot.apps.filter((item) => item.health === "passed")) {
         selectableDataVolumes(options.dataVolumeGb).map(String),
       ];
       const defaults = [options.appVersion, options.region, options.instanceType, String(options.dataVolumeGb)];
-      assert.equal(selects.length, 4);
-      assert.equal([...html.matchAll(/<select\b/g)].length, 4);
+      const selectCount = options.persistence === "none" ? 3 : 4;
+      assert.equal(selects.length, selectCount);
+      assert.equal([...html.matchAll(/<select\b/g)].length, selectCount);
       selects.forEach((select, index) => {
         const items = [...select[2].matchAll(/<option([^>]*)value="([^"]+)"([^>]*)>/g)];
         assert.deepEqual(items.map((item) => item[2]), choices[index]);
@@ -172,4 +174,76 @@ test("DeployGuide binds the verification evidence to the one-click template revi
   assert.ok(html.includes("deploy-guide__meta"));
   assert.ok(html.includes("f14bc41"));
   assert.ok(html.includes("corenova-one-click.template.yaml"));
+});
+
+test("AppDetail none SSR hides disk sizing, explains storage/charges and keeps incomplete evidence disabled", async () => {
+  // Inject only into the SSR module's in-memory objects and restore afterward.
+  // No generated source or data files are changed for this fixture.
+  const data = await server.ssrLoadModule("/src/data/generated.ts");
+  const app = (data.CURRENTS as AppCurrent[]).find((item) => item.health === "passed")!;
+  assert.ok(app);
+  const records = data.versionRecords(app.app) as { current: AppCurrent; manifest: VerificationManifest }[];
+  assert.ok(records.length);
+  const originals = [...new Set([app, ...records.map((record) => record.current)])]
+    .map((current) => ({ current, deploy: current.deploy }));
+  const digests = records.map(({ manifest }) => ({ manifest, digest: manifest.container.digest }));
+  const resetFixture = () => {
+    for (const { current, deploy } of originals) {
+      current.deploy = {
+        ...deploy, persistence: "none", data_volume_gb: 0, health_check_path: "/",
+      };
+      delete current.deploy.data_path;
+      delete current.deploy.hold;
+      delete current.deploy.cost_estimate;
+      delete current.deploy.post_deploy;
+    }
+    for (const { manifest } of digests) manifest.container.digest = "sha256:test-none";
+  };
+  try {
+    for (const locale of ["en", "zh"] as const) {
+      resetFixture();
+      const html = renderRoute(`/${locale}/apps/${app.app}/`);
+      const summary = html.match(/<dl class="deployment-summary">([\s\S]*?)<\/dl>/)?.[1];
+      const customize = html.match(/<details class="deployment-customize">([\s\S]*?)<\/details>/)?.[1];
+      assert.ok(summary);
+      assert.ok(customize);
+      assert.ok(summary.includes(locale === "en" ? "No application data disk" : "无应用数据盘"));
+      assert.doesNotMatch(summary, /\bGB\b|undefined/);
+      assert.equal([...customize.matchAll(/<select\b/g)].length, 3);
+      assert.doesNotMatch(customize, /\bGB\b/);
+      assert.match(html, /deploy-configurator__status is-verified/);
+      assert.ok(html.includes(copy[locale].costFallback));
+      for (const className of ["deployment-preparation", "deploy-guide__next", "faq-list"]) {
+        const section = html.slice(html.indexOf(`class="${className}"`));
+        assert.ok(section.includes(locale === "en" ? "browser download or export" : "浏览器下载或导出"));
+      }
+      assert.ok(html.includes(locale === "en" ? "instance and root disk still incur charges" : "实例和系统盘仍会计费"));
+      assert.doesNotMatch(html, /data volume is retained|volume survives stack deletion|数据卷会被保留|删栈后数据卷保留/);
+      assert.doesNotMatch(html, /≈ \$/);
+
+      for (const conflict of ["hold", "digest", "size", "path", "legacy"] as const) {
+        resetFixture();
+        for (const { current } of originals) {
+          if (conflict === "hold") current.deploy.hold = { reason: { en: "paused", zh: "暂停" } };
+          if (conflict === "size") current.deploy.data_volume_gb = 8;
+          if (conflict === "path") current.deploy.data_path = "/data";
+          if (conflict === "legacy") {
+            delete current.deploy.persistence;
+            current.deploy.data_volume_gb = 30;
+          }
+        }
+        if (conflict === "digest") {
+          for (const { manifest } of digests) manifest.container.digest = "";
+        }
+        const blocked = renderRoute(`/${locale}/apps/${app.app}/`);
+        const button = blocked.match(/<div class="deploy-configurator__action">\s*<button([^>]*)>/);
+        assert.ok(button);
+        assert.match(button[1], /\bdisabled=/, `${locale}: ${conflict}`);
+        assert.doesNotMatch(blocked, /class="deployment-summary"|<select\b/);
+      }
+    }
+  } finally {
+    for (const { current, deploy } of originals) current.deploy = deploy;
+    for (const { manifest, digest } of digests) manifest.container.digest = digest;
+  }
 });

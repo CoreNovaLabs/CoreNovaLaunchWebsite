@@ -28,9 +28,10 @@ export function DeployPreparation({ app, region, showCost = true }: { app: AppCu
       <p className="deployment-preparation__cost">
         <strong>{t("est_cost")} · {cost ? t("est_cost_value", { usd: cost.monthly_usd }) : t("cost_shown_in_aws")}</strong>
         {cost?.note && <span>{pick(locale, cost.note)}</span>}
-        <span>{t("deploy_cost_basis")}</span>
+        <span>{t(app.deploy.persistence === "none" ? "deploy_cost_basis_none" : "deploy_cost_basis")}</span>
       </p>
-      <p className="deploy-guide__warning">{t("deploy_guide_delete_warning")}</p>
+      {app.deploy.persistence === "none" && <p>{t("deploy_stateless_data")}</p>}
+      <p className="deploy-guide__warning">{t(app.deploy.persistence === "none" ? "deploy_delete_warning_none" : "deploy_guide_delete_warning")}</p>
       <div className="deployment-preparation__links">
         <a href={l("/docs/verification/")} className="link-blue">{t("deploy_access_help")}</a>
         <a href={l("/docs/aws-costs/")} className="link-blue">{t("deploy_cost_cleanup_help")}</a>
@@ -148,15 +149,21 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
       <div className="deploy-guide__next">
         <h4>{t("deploy_guide_next_title")}</h4>
         <ul>
-          {app.deploy.data_path && (
-            <li>{t("deploy_guide_next_data", { path: app.deploy.data_path })}</li>
+          {app.deploy.persistence === "none" ? (
+            <li>{t("deploy_stateless_data")}</li>
+          ) : (
+            <>
+              {app.deploy.data_path && (
+                <li>{t("deploy_guide_next_data", { path: app.deploy.data_path })}</li>
+              )}
+              <li>
+                {t("deploy_guide_next_backup_prefix")}{" "}
+                <a href={l("/docs/upgrading-and-backups/")} className="link-blue">
+                  {t("deploy_guide_next_backup_link")}
+                </a>
+              </li>
+            </>
           )}
-          <li>
-            {t("deploy_guide_next_backup_prefix")}{" "}
-            <a href={l("/docs/upgrading-and-backups/")} className="link-blue">
-              {t("deploy_guide_next_backup_link")}
-            </a>
-          </li>
           <li>
             {t("deploy_guide_next_upgrade_prefix")}{" "}
             <a href={l(`/apps/${app.app}/versions/`)} className="link-blue">
@@ -164,7 +171,7 @@ export function DeployGuide({ app }: { app: AppCurrent }) {
             </a>
           </li>
         </ul>
-        <p className="deploy-guide__warning">{t("deploy_guide_delete_warning")}</p>
+        <p className="deploy-guide__warning">{t(app.deploy.persistence === "none" ? "deploy_delete_warning_none" : "deploy_guide_delete_warning")}</p>
       </div>
       {app.deploy.template?.revision && (
         <p className="deploy-guide__meta">
